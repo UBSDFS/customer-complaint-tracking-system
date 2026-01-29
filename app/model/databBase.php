@@ -1,6 +1,6 @@
 <!-- DB connection code goes here  for MySQL db in phpMyAdmin -->
 <?php
-class databBase
+class dataBase
 {
     private $host = "localhost";
     private $db_name = ""; //database name
