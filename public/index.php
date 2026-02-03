@@ -4,7 +4,7 @@
 
 require_once __DIR__ . '/../app/controller/authcontroller.php';
 require_once __DIR__ . '/../app/controller/registrationController.php';
-
+require_once __DIR__ . '/../app/controller/dashboardController.php'; //Connect to authcontroller once verified login
 $action = $_GET['action'] ?? 'showLogin';
 //Switch statement for routing based on action. User login or registration of new user
 switch ($action) {
@@ -14,6 +14,10 @@ switch ($action) {
 
     case 'register':
         (new RegistrationController())->registration();
+        break;
+
+    case 'dashboard':
+        (new DashboardController())->show();
         break;
 
     default:
