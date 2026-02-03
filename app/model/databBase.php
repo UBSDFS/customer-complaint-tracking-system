@@ -16,7 +16,7 @@ class dataBase
             $this->conn = new mysqli(
                 $this->host, 
                 $this->username,
-                $this->password, 
+                $this->password
                 );
 
             if ($this->conn->connect_error) {
@@ -26,8 +26,7 @@ class dataBase
             // Create Database if it does not exist
             $this->conn->query(
                 "CREATE DATABASE IF NOT EXISTS {$this->db_name}
-                CHARACTER SET utf8
-                COLLATE utf8"
+                CHARACTER SET utf8"
                 );
 
             // select DB
