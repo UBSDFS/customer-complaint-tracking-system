@@ -12,7 +12,7 @@ CREATE TABLE users (
 );
 
 --2) Customer Profiles
-CREATE TABLE customer_profiles (
+CREATE TABLE IF NOT EXISTS customer_profiles (
     user_id INT PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE customer_profiles (
 );
 
 --3) Employee Profiles
-CREATE TABLE employee_profiles (
+CREATE TABLE IF NOT EXISTS employee_profiles (
     user_id INT PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
@@ -39,21 +39,21 @@ CREATE TABLE employee_profiles (
 );
 
 --4) Products/Services
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80) NOT NULL UNIQUE,
     description VARCHAR(255) DEFAULT NULL
 );
 
 --5) Complaint Types
-CREATE TABLE complaint_types (
+CREATE TABLE IF NOT EXISTS complaint_types (
     complaint_type_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80) NOT NULL UNIQUE,
     description VARCHAR(255) DEFAULT NULL
 );
 
 -- 6) COMPLAINTS
-CREATE TABLE complaints (
+CREATE TABLE IF NOT EXISTS complaints (
     complaint_id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     tech_id INT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE complaints (
 );
 
 -- Example seed data: 5 products/services
-INSERT INTO products (name, description) VALUES
+INSERT IGNORE INTO products (name, description) VALUES
     ('Laptop', 'Personal Portable Computer'),
     ('Cell Phone', 'Personal Cellular Phone'),
     ('House Phone', 'Shared Static Phone'),
@@ -90,27 +90,27 @@ INSERT INTO products (name, description) VALUES
     ('Desktop PC', 'Static Desktop PC');
 
 -- Example seed data: 3 complaint types
-INSERT INTO complaint_types (name, description) VALUES
+INSERT IGNORE INTO complaint_types (name, description) VALUES
     ('Product Defect', 'Product arrived broken or fails under normal use'),
     ('Warranty Claim', 'Customer needs help filing or using warranty'),
     ('Billing Issue', 'Incorrect charges, refunds, or invoice problems');
 
 --Example seed data: 3 users
-INSERT INTO users (email, password_hash, role) VALUES
+INSERT IGNORE INTO users (email, password_hash, role) VALUES
     ('customer@example.com', 'customerPass', 'customer'),
     ('tech@example.com', 'techPass', 'tech'),
     ('admin@example.com', 'adminPass', 'admin');
 
 --Example seed data: 1 customer profile
-INSERT INTO customer_profiles(user_id, first_name, last_name, street_address, city, state, zip, phone) VALUES
+INSERT IGNORE INTO customer_profiles(user_id, first_name, last_name, street_address, city, state, zip, phone) VALUES
     (1, 'Kyle', 'Bentley', '123 Street Road', 'Moyock', 'NC', '12345', '7571111111');
 
 
 --Example seed data: 2 Employee profile
-INSERT INTO employee_profiles(user_id, first_name, last_name, phone_ext, level) VALUES
+INSERT IGNORE INTO employee_profiles(user_id, first_name, last_name, phone_ext, level) VALUES
     (2, 'Ulysses', 'Burden', '7572222222', 'tech'),
     (3, 'Bryson', 'Weaver', '7573333333', 'admin');
 
 --Example seed data: 1 complaint
-INSERT INTO complaints(customer_id, tech_id, product_id, complaint_type_id, status, details) VALUES
+INSERT IGNORE INTO complaints(customer_id, tech_id, product_id, complaint_type_id, status, details) VALUES
     (1, 2, 1, 1, 'assigned', 'My laptop will not turn on!');
