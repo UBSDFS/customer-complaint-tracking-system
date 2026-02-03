@@ -13,7 +13,7 @@ $passwordconfirmation_error = '';
 //Retrieve values from query string and store in local variable after page load
 if (isset($_POST['username'], $_POST['password'], $_POST['passwordConfirmation'])) {
 
-    $username = ($_POST['username']);
+    $username = $_POST['username'];
     $password = $_POST['password'];
     $passwordConfirmation = $_POST['passwordConfirmation'];
 

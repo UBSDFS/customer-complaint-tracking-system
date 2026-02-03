@@ -17,13 +17,13 @@
                 <div class="field">
                     <label for="email">E-Mail:</label>
                     <input type="text" name="email" value="<?php echo htmlspecialchars($email) ?>"><br>
-                    <?= htmlspecialchars($errors["email"]) ?>
+                    <?= htmlspecialchars($errors["email_error"]) ?>
                     <br>
                 </div>
                 <div class="field">
                     <label for="password">Password:</label>
                     <input type="password" name="password" required><br>
-                    <?= htmlspecialchars($errors["password"]) ?><br>
+                    <?= htmlspecialchars($errors["password_error"]) ?><br>
                     <br>
                 </div>
                 <button type="submit" class="btn-primary">Login</button>
