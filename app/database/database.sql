@@ -98,9 +98,9 @@ INSERT IGNORE INTO complaint_types (name, description) VALUES
 
 --Example seed data: 3 users
 INSERT IGNORE INTO users (email, password_hash, role) VALUES
-    ('customer@example.com', 'customerPass', 'customer'),
-    ('tech@example.com', 'techPass', 'tech'),
-    ('admin@example.com', 'adminPass', 'admin');
+    ('customer@example.com', 'customerPass!', 'customer'),
+    ('tech@example.com', 'techPass!', 'tech'),
+    ('admin@example.com', 'adminPass!', 'admin');
 
 --Example seed data: 1 customer profile
 INSERT IGNORE INTO customer_profiles(user_id, first_name, last_name, street_address, city, state, zip, phone) VALUES
