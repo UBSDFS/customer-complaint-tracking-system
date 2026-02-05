@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS complaints (
     tech_id INT NULL,
     product_id INT NOT NULL,
     complaint_type_id INT NOT NULL,
+    complaint_resolution_date DATE DEFAULT NULL,
 
     status ENUM('open','assigned','in_progress','resolved') NOT NULL DEFAULT 'open',
     details TEXT NOT NULL,
