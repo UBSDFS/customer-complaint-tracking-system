@@ -1,4 +1,46 @@
 <?php
+
+class DashboardController
+{
+    public function show()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=showLogin');
+            exit;
+        }
+
+        $role = $_SESSION['role'] ?? 'tech';
+
+        $user = [
+            'name' => $_SESSION['name'] ?? 'Ulysses',
+            'email' => $_SESSION['email'] ?? 'tech@example.com'
+        ];
+
+        $complaints = [];
+
+        switch ($role) {
+            case 'customer':
+                include_once __DIR__ . '/../views/dashboard/customer.php';
+                break;
+
+            case 'tech':
+                include_once __DIR__ . '/../views/dashboard/tech.php';
+
+                break;
+
+            case 'admin':
+                include_once __DIR__ . '/../views/dashboard/admin.php';
+                break;
+
+            default:
+                include_once __DIR__ . '/../views/dashboard/customer.php';
+                break;
+        }
+    }
+}
+
+
+/*<?php
 class DashboardController
 {
     //function to show the dashboard view
@@ -19,15 +61,16 @@ class DashboardController
                 include_once '../app/views/dashboard/customer.php';
                 break;
             case 'technician':
-                include_once '../app/views/dashboard/tech.php';
+            case 'tech':
+                include_once '/../views/dashboard/tech.php';
                 break;
             case 'admin':
                 include_once '../app/views/dashboard/admin.php';
                 break;
             default:
                 // Default to customer dashboard if role is unknown
-                include_once '../app/views/dashboard.php';
+                include_once '../app/views/dashboard/customer.php';
                 break;
         }
     }
-}
+}*/
