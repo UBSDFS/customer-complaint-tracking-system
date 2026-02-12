@@ -31,6 +31,9 @@ switch ($action) {
     case 'dashboard':
         (new DashboardController())->show();
         break;
+    
+    case 'createComplaint':
+        
 
 
     default:
