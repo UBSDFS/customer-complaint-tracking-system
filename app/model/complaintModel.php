@@ -328,3 +328,125 @@ class ComplaintModel
         return ['ok' => true];
     }
 }
+<<<<<<< HEAD
+=======
+
+    // Should only be used by admins/techs to delete duplicate complaints/spam
+    public function deleteComplaint(int $complaint_id): array
+{
+    if ($complaint_id <= 0) {
+        return ['ok' => false, 'error' => 'Invalid complaint_id.'];
+    }
+
+    $sql = "DELETE FROM complaints WHERE complaint_id = ?";
+
+    $stmt = $this->db->prepare($sql);
+    if (!$stmt) {
+        return ['ok' => false, 'error' => $this->db->error];
+    }
+
+    $stmt->bind_param("i", $complaint_id);
+
+    if (!$stmt->execute()) {
+        return ['ok' => false, 'error' => $stmt->error];
+    }
+
+    if ($stmt->affected_rows === 0) {
+        return ['ok' => false, 'error' => 'No complaint deleted (not found).'];
+    }
+
+    return ['ok' => true];
+}
+
+    // Get all complaints for a customer
+public function getComplaintsByCustomerId(int $customer_id): array
+{
+    if ($customer_id <= 0) {
+        return ['ok' => false, 'error' => 'Invalid customer_id.'];
+    }
+
+    $sql = "SELECT * FROM complaints WHERE customer_id = ?";
+
+    $stmt = $this->db->prepare($sql);
+    if (!$stmt) {
+        return ['ok' => false, 'error' => $this->db->error];
+    }
+
+    $stmt->bind_param("i", $customer_id);
+
+    if (!$stmt->execute()) {
+        return ['ok' => false, 'error' => $stmt->error];
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows === 0) {
+        return ['ok' => false, 'error' => 'No complaints found for this customer.'];
+    }
+
+    $complaints = [];
+    while ($row = $result->fetch_assoc()) {
+        $complaints[] = $row;
+    }
+
+    return ['ok' => true, 'complaints' => $complaints];
+}
+
+    // Get a single complaint by complaint_id
+public function getComplaintById(int $complaint_id): array
+{
+    if ($complaint_id <= 0) {
+        return ['ok' => false, 'error' => 'Invalid complaint_id.'];
+    }
+
+    $sql = "SELECT * FROM complaints WHERE complaint_id = ?";
+
+    $stmt = $this->db->prepare($sql);
+    if (!$stmt) {
+        return ['ok' => false, 'error' => $this->db->error];
+    }
+
+    $stmt->bind_param("i", $complaint_id);
+
+    if (!$stmt->execute()) {
+        return ['ok' => false, 'error' => $stmt->error];
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows === 0) {
+        return ['ok' => false, 'error' => 'Complaint not found.'];
+    }
+
+    $complaint = $result->fetch_assoc();
+    return ['ok' => true, 'complaint' => $complaint];
+}
+
+// Get all complaints in the system
+public function getAllComplaints(): array
+{
+    $sql = "SELECT * FROM complaints";
+
+    $stmt = $this->db->prepare($sql);
+    if (!$stmt) {
+        return ['ok' => false, 'error' => $this->db->error];
+    }
+
+    if (!$stmt->execute()) {
+        return ['ok' => false, 'error' => $stmt->error];
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows === 0) {
+        return ['ok' => false, 'error' => 'No complaints found in the system.'];
+    }
+
+    $complaints = [];
+    while ($row = $result->fetch_assoc()) {
+        $complaints[] = $row;
+    }
+
+    return ['ok' => true, 'complaints' => $complaints];
+}
+
+}
+
+>>>>>>> cb43b8bc36624bdf7fc28458729cd2667f625150
