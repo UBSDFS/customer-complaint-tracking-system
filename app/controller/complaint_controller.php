@@ -10,16 +10,6 @@ class ComplaintsController
         $this->complaintModel = new ComplaintModel($db);
     }
 
-    public function createTestComplaint()
-    {
-        $result = $this->complaintModel->createTestComplaint();
-
-        if ($result['ok']) {
-            echo "Test complaint created with ID: " . $result['complaint_id'];
-        } else {
-            echo "Error creating test complaint: " . $result['error'];
-        }
-    }
     // 
     public function createComplaint($customer_id, $product_id, $complaint_type_id, $details, $image_path = null)
     {
@@ -71,6 +61,7 @@ class ComplaintsController
         } else {
             echo "Error resolving complaint: " . $queryResult['error'];
         }
+    }
     
     public function appendToComplaintDetails($complaint_id, $new_note, $author_label = null)
     {
