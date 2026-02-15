@@ -56,7 +56,7 @@ class AuthController
             }
         }
 
-        // ALWAYS load view (outside POST block)
+        
         require __DIR__ . '/../views/auth/login.php';
     }
 
