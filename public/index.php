@@ -9,9 +9,9 @@ require_once __DIR__ . '/../app/model/userModel.php';
 require_once __DIR__ . '/../app/controller/authController.php';
 require_once __DIR__ . '/../app/controller/registrationController.php';
 require_once __DIR__ . '/../app/controller/dashboardController.php'; //Connect to authcontroller once verified login
-require_once __DIR__ . '/../app/controller/newComplaintController.php';
-require_once __DIR__ . '/../app/controller/dashboardController.php';
 require_once __DIR__ . '/../app/controller/profileController.php';
+require_once __DIR__ . '/../app/controller/complaintController.php';
+
 
 
 
@@ -36,11 +36,7 @@ switch ($action) {
         break;
 
     case 'dashboard':
-        (new DashboardController())->show();
-        break;
-    
-    case 'createComplaint':
-        (new newComplaintController())->newComplaint();
+        (new DashboardController($db))->show();
         break;
 
     case 'profile':
@@ -49,6 +45,14 @@ switch ($action) {
 
     case 'updateProfile':
         (new ProfileController($db))->update();
+        break;
+
+    case 'newComplaint':
+        (new ComplaintController($db))->create();
+        break;
+
+    case 'storeComplaint':
+        (new ComplaintController($db))->store();
         break;
 
     default:

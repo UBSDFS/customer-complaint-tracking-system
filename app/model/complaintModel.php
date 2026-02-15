@@ -4,42 +4,44 @@ class ComplaintModel
 {
     private $db;
 
-    //receieve dabase connection
+    //receive database connection
     public function __construct($databaseConnection)
     {
         $this->db = $databaseConnection;
     }
-    // Create a complaint
-    public function createComplaint(int $customer_id, int $product_id, int $complaint_type_id, string $details, ?string $image_path = null): array
-    {
-
-        if ($customer_id <= 0 || $product_id <= 0 || $complaint_type_id <= 0) {
+    public function createComplaint(
+        int $customer_id,
+        int $complaint_type_id,
+        string $details,
+        ?int $product_id = null,
+        ?string $image_path = null
+    ): array {
+        if ($customer_id <= 0 || $complaint_type_id <= 0) {
             return ['ok' => false, 'error' => 'Invalid IDs provided.'];
         }
 
+        $details = trim($details);
         if ($details === '') {
             return ['ok' => false, 'error' => 'Complaint details cannot be empty.'];
         }
 
-        $sql = "INSERT INTO complaints (customer_id, product_id, complaint_type_id, details, image_path)
-            VALUES (?, ?, ?, ?, ?)";
+        // Default status to open on creation
+        $status = 'open';
+
+        $sql = "INSERT INTO complaints (customer_id, product_id, complaint_type_id, details, image_path, status)
+            VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return ['ok' => false, 'error' => $this->db->error];
-        }
+        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
 
-        $stmt->bind_param("iiiss", $customer_id, $product_id, $complaint_type_id, $details, $image_path);
 
-        if (!$stmt->execute()) {
-            return ['ok' => false, 'error' => $stmt->error];
-        }
+        $stmt->bind_param("iiisss", $customer_id, $product_id, $complaint_type_id, $details, $image_path, $status);
 
-        return [
-            'ok' => true,
-            'complaint_id' => $stmt->insert_id
-        ];
+        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+
+        return ['ok' => true, 'complaint_id' => $stmt->insert_id];
     }
+
 
     // Assign a tech to a complaint
     public function assignTech(int $complaint_id, int $tech_id): array
@@ -48,7 +50,7 @@ class ComplaintModel
             return ['ok' => false, 'error' => 'Invalid complaint_id or tech_id.'];
         }
 
-        // Assign tech. If complaint is currently 'open', move it to 'assigned'.
+
         $sql = "UPDATE complaints
             SET tech_id = ?,
                 status = CASE
@@ -69,14 +71,14 @@ class ComplaintModel
         }
 
         if ($stmt->affected_rows === 0) {
-            // Could mean complaint_id not found OR values were identical
+
             return ['ok' => false, 'error' => 'No complaint updated (invalid complaint_id or no change).'];
         }
 
         return ['ok' => true];
     }
 
-    // Updates the status of the complaint, do not use to resolve a complaint
+
     public function updateStatus(int $complaint_id, string $status): array
     {
         if ($complaint_id <= 0) {
@@ -89,12 +91,12 @@ class ComplaintModel
             return ['ok' => false, 'error' => 'Invalid status value.'];
         }
 
-        // Enforce rule: resolution date is only set by resolveComplaint()
+
         if ($status === 'resolved') {
             return ['ok' => false, 'error' => "Use resolveComplaint() to mark a complaint as resolved."];
         }
 
-        // If moving away from resolved, clear the resolution date.
+
         $sql = "UPDATE complaints
             SET status = ?,
                 complaint_resolution_date = NULL
@@ -118,7 +120,7 @@ class ComplaintModel
         return ['ok' => true];
     }
 
-    // Sets complaint as resolved and sets resolution date, defaults to current date if no date provided
+
     public function resolveComplaint(int $complaint_id, ?string $resolution_date = null): array
     {
         if ($complaint_id <= 0) {
@@ -169,7 +171,7 @@ class ComplaintModel
         return ['ok' => true];
     }
 
-    // Append information to the complaint details, can be used by customers/techs to communicate, give updates, etc
+
     public function appendDetails(int $complaint_id, string $new_note, ?string $author_label = null): array
     {
         if ($complaint_id <= 0) {
@@ -211,10 +213,7 @@ class ComplaintModel
             $row = $result->fetch_assoc();
             $existing = (string)($row['details'] ?? '');
 
-            // Build appended block
-            // Example:
-            // --- UPDATE (2026-02-10 14:23) [Tech] ---
-            // message...
+
             $timestamp = date('Y-m-d H:i');
             $header = "--- UPDATE ({$timestamp})";
             if ($author_label !== null && $author_label !== '') {
@@ -224,7 +223,7 @@ class ComplaintModel
 
             $block = $header . "\n" . $new_note;
 
-            // Ensure there is spacing between old and new content
+
             $combined = trim($existing);
             if ($combined !== '') {
                 $combined .= "\n\n" . $block;
@@ -232,7 +231,7 @@ class ComplaintModel
                 $combined = $block;
             }
 
-            // Write back updated details
+
             $updateSql = "UPDATE complaints SET details = ? WHERE complaint_id = ?";
             $updateStmt = $this->db->prepare($updateSql);
             if (!$updateStmt) {
@@ -254,7 +253,7 @@ class ComplaintModel
         }
     }
 
-    // Should only be used by admins/techs to delete duplicate complaints/spam
+    // Should only be used by admins/techs to delete duplicate complaints
     public function deleteComplaint(int $complaint_id): array
     {
         if ($complaint_id <= 0) {
@@ -288,7 +287,12 @@ class ComplaintModel
             return ['ok' => false, 'error' => 'Invalid customer_id.'];
         }
 
-        $sql = "SELECT * FROM complaints WHERE customer_id = ?";
+        $sql = "SELECT c.*, ct.name AS complaint_type_name
+        FROM complaints c
+        JOIN complaint_types ct ON c.complaint_type_id = ct.complaint_type_id
+        WHERE c.customer_id = ?
+        ORDER BY c.complaint_id DESC";
+
 
         $stmt = $this->db->prepare($sql);
         if (!$stmt) {
@@ -368,5 +372,24 @@ class ComplaintModel
         }
 
         return ['ok' => true, 'complaints' => $complaints];
+    }
+    public function getComplaintTypes(): array
+    {
+        $sql = "SELECT complaint_type_id, name
+                FROM complaint_types
+                ORDER BY complaint_type_id";
+
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+
+        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+
+        $result = $stmt->get_result();
+        $types = [];
+        while ($row = $result->fetch_assoc()) {
+            $types[] = $row;
+        }
+
+        return ['ok' => true, 'types' => $types];
     }
 }

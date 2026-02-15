@@ -8,7 +8,7 @@ class UserModel
         $this->db = $db;
     }
 
-    // Get user by email (includes customer name if exists)
+
     public function getUserByEmail(string $email)
     {
         $sql = "SELECT u.user_id, u.email, u.password_hash, u.role,
@@ -52,7 +52,6 @@ class UserModel
         return $row;
     }
 
-    // Update USERS email (common for any role)
     public function updateUserEmail(int $userId, string $email): array
     {
         $email = trim($email);
@@ -90,7 +89,7 @@ class UserModel
         return ['success' => true];
     }
 
-    // Update CUSTOMER profile fields
+
     public function updateCustomerProfile(
         int $userId,
         string $firstName,
@@ -135,7 +134,7 @@ class UserModel
         return ['success' => false, 'error' => 'Tech profile update not implemented (no tech_profiles table wired yet).'];
     }
 
-    // Admin: list users (basic)
+
     public function getAllUsers(): array
     {
         $sql = "SELECT user_id, email, role
@@ -153,8 +152,7 @@ class UserModel
     {
         if ($userId <= 0) return ['success' => false, 'error' => 'Invalid user id'];
 
-        // NOTE: If you have FK constraints, you may need to delete profile rows first:
-        // $this->db->query("DELETE FROM customer_profiles WHERE user_id = " . (int)$userId);
+
 
         $sql = "DELETE FROM users WHERE user_id = ?";
         $stmt = $this->db->prepare($sql);
@@ -172,7 +170,7 @@ class UserModel
         return ['success' => true];
     }
 
-    // Your existing registerCustomer stays as-is ↓
+
     public function registerCustomer(string $email, string $password, string $firstName, string $lastName, string $streetAddress, string $city, string $state, string $zip, string $phone)
     {
         $this->db->begin_transaction();

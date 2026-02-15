@@ -1,39 +1,17 @@
 <?php
-//Declare and clear variables
-$complaintTypeId = '';
-$customerId = '';
-$productId = '';
-$complaintTypeId = '';
-$details = '';
-$imagePath = '';
-
-
-//Declare and  clear variables for error messages
-// $complaintTypeId_error = '';
-
-
-//Retrieve values from query string and store in local variable after page load
-if (isset($_POST['complaintTypeId'], $_POST['customerId'], $_POST['productId'], $_POST['complaintTypeId'], 
-$_POST['details'], $_POST['imagePath'])) {
-
-    $complaintTypeId = ($_POST['complaintTypeId']);
-    $customerId = ($_POST['customerId']);
-    $productId = ($_POST['productId']);
-    $complaintTypeId = ($_POST['complaintTypeId']);
-    $details = ($_POST['details']);
-    $imagePath = ($_POST['imagePath']);
-
-    header("Location: index.php");
-    exit;
-}
-
+$types  = $types  ?? [];
+$errors = $errors ?? [];
+$old    = $old    ?? ['complaintTypeId' => '', 'details' => ''];
 ?>
 
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <link rel="stylesheet" href="/customer-complaint-tracking-system/public/assets/css/registration.css"> <!-- added path to css-->
-    <title>SDC342L Project New Complaint Page</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/customer-complaint-tracking-system/public/assets/css/registration.css">
+    <title>New Complaint</title>
 </head>
 
 <body>
@@ -43,37 +21,49 @@ $_POST['details'], $_POST['imagePath'])) {
                 <h2>New Complaint</h2>
             </header>
 
-            <form method='POST'>
+            <?php if (!empty($errors)): ?>
+                <div class="error-box">
+                    <ul>
+                        <?php foreach ($errors as $e): ?>
+                            <li><?= htmlspecialchars($e) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST"
+                action="index.php?action=storeComplaint"
+                enctype="multipart/form-data">
+
+
                 <div class="field">
                     <label for="complaintTypeId">Complaint Type:</label>
-                    <input type="text" name="complaintTypeId" value="<?php echo htmlspecialchars($complaintTypeId) ?>"><br><br>
+                    <select id="complaintTypeId" name="complaintTypeId" required>
+                        <option value="">-- Select a type --</option>
+                        <?php foreach ($types as $t): ?>
+                            <option value="<?= (int)$t['complaint_type_id'] ?>"
+                                <?= ((string)$old['complaintTypeId'] === (string)$t['complaint_type_id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($t['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
+
                 <div class="field">
-                    <label for="customerId">CustomerId:</label>
-                    <input type="text" name="customerId" value="<?php echo htmlspecialchars($customerId) ?>"><br><br>
+                    <label for="details">Description:</label>
+                    <textarea id="details" name="details" rows="5" required><?= htmlspecialchars($old['details']) ?></textarea>
                 </div>
+
                 <div class="field">
-                    <label for="productId">ProductId:</label>
-                    <input type="text" name="productId" value="<?php echo htmlspecialchars($productId) ?>"><br><br>
-                </div>
-                <div class="field">
-                    <label for="complaintTypeId">complaintTypeId:</label>
-                    <input type="text" name="complaintTypeId" value="<?php echo htmlspecialchars($complaintTypeId) ?>"><br><br>
-                </div>
-                <div class="field">
-                    <label for="details">details:</label>
-                    <input type="text" name="details" value="<?php echo htmlspecialchars($details) ?>"><br><br>
-                </div>
-                <div class="field">
-                    <label for="imagePath">Image Path:</label>
-                    <input type="text" name="imagePath" value="<?php echo htmlspecialchars($imagePath) ?>"><br><br>
+                    <label for="image">Attach Image (optional):</label>
+                    <input id="image" type="file" name="image" accept="image/*">
                 </div>
 
                 <div class="actions">
-                    <input type="submit" value="Submit Complaint"><br><br>
-                    <a href="index.php">Cancel</a>
-                </div>
+                    <input type="submit" value="Submit Complaint">
+                    <a href="index.php?action=dashboard">Cancel</a>
 
+                </div>
             </form>
         </section>
     </main>
