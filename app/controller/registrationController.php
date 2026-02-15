@@ -1,5 +1,5 @@
 <?php
-//Simple controller
+
 class RegistrationController
 {
     private $userModel;
