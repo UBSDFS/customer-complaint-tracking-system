@@ -11,8 +11,6 @@
 
 <body>
     <main class="dash">
-
-
         <aside class="profile-card">
             <div class="avatar" aria-hidden="true">PFP</div>
 
@@ -38,6 +36,7 @@
             </div>
 
             <a class="btn secondary" href="index.php?action=profile">Edit Profile</a>
+            <a class="btn tertiary" href="index.php?action=logout">Logout</a>
         </aside>
 
 

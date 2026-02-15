@@ -115,3 +115,8 @@ INSERT IGNORE INTO employee_profiles(user_id, first_name, last_name, phone_ext, 
 -- Example seed data: 1 complaint
 INSERT IGNORE INTO complaints(customer_id, tech_id, product_id, complaint_type_id, status, details) VALUES
     (1, 2, 1, 1, 'assigned', 'My laptop will not turn on!');
+
+-- added tech notes to complaints table
+ALTER TABLE complaints
+  ADD COLUMN technician_notes TEXT NULL AFTER details,
+  ADD COLUMN resolution_notes TEXT NULL AFTER technician_notes;

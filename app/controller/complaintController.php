@@ -1,8 +1,9 @@
 <?php
+require_once __DIR__ . '/../model/complaintModel.php';
 
 class ComplaintController
 {
-    private $complaintModel;
+    private ComplaintModel $complaintModel;
 
     public function __construct($db)
     {
@@ -30,7 +31,6 @@ class ComplaintController
             exit;
         }
 
-        // customer_id comes from session
         $customer_id = (int)($_SESSION['user_id'] ?? 0);
         if ($customer_id <= 0) {
             header("Location: index.php?action=showLogin");
@@ -44,16 +44,15 @@ class ComplaintController
         if ($complaint_type_id <= 0) $errors[] = "Please select a complaint type.";
         if ($details === '') $errors[] = "Description is required.";
 
-
         $image_path = null;
         if (!empty($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
 
             if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
                 $errors[] = "Image upload failed.";
             } else {
-                // basic validation: ensure it's an image
                 $tmp = $_FILES['image']['tmp_name'];
                 $info = @getimagesize($tmp);
+
                 if ($info === false) {
                     $errors[] = "Uploaded file is not a valid image.";
                 } else {
@@ -72,7 +71,6 @@ class ComplaintController
                     if (!move_uploaded_file($tmp, $dest)) {
                         $errors[] = "Could not save uploaded image.";
                     } else {
-                        // store web path in DB
                         $image_path = '/customer-complaint-tracking-system/public/uploads/complaints/' . $filename;
                     }
                 }
@@ -88,7 +86,7 @@ class ComplaintController
             return;
         }
 
-
+        // TODO: replace this hardcode when product selection is implemented
         $product_id = 1;
 
         $result = $this->complaintModel->createComplaint(
@@ -109,8 +107,143 @@ class ComplaintController
             return;
         }
 
-
         header("Location: index.php?action=dashboard");
+        exit;
+    }
+
+    // GET: complaint details (customer/tech/admin)
+    public function show()
+    {
+        $complaintId = isset($_GET['complaint_id']) ? (int)$_GET['complaint_id'] : 0;
+        if ($complaintId <= 0) {
+            http_response_code(400);
+            echo "Invalid complaint id";
+            return;
+        }
+
+        $result = $this->complaintModel->getComplaintById($complaintId);
+        if (!$result['ok']) {
+            http_response_code(404);
+            echo $result['error'];
+            return;
+        }
+        $complaint = $result['complaint'];
+
+        $role = $_SESSION['role'] ?? null;
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+
+        if (!$role || $userId <= 0) {
+            header("Location: index.php?action=showLogin");
+            exit;
+        }
+
+        if ($role === 'customer' && (int)$complaint['customer_id'] !== $userId) {
+            http_response_code(403);
+            echo "Forbidden";
+            return;
+        }
+
+        if ($role === 'technician' && (int)$complaint['tech_id'] !== $userId) {
+            http_response_code(403);
+            echo "Forbidden";
+            return;
+        }
+
+        require BASE_PATH . '/app/views/complaints/show.php';
+    }
+
+    // GET: tech/admin edit screen
+    public function edit()
+    {
+        $role = $_SESSION['role'] ?? null;
+        if ($role !== 'technician' && $role !== 'admin') {
+            http_response_code(403);
+            echo "Forbidden";
+            return;
+        }
+
+        $complaintId = isset($_GET['complaint_id']) ? (int)$_GET['complaint_id'] : 0;
+        if ($complaintId <= 0) {
+            http_response_code(400);
+            echo "Invalid id";
+            return;
+        }
+
+        $result = $this->complaintModel->getComplaintById($complaintId);
+        if (!$result['ok']) {
+            http_response_code(404);
+            echo $result['error']; // "Complaint not found."
+            return;
+        }
+
+        $complaint = $result['complaint'];
+
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+
+        // tech must be assigned to it (admin can bypass)
+        if ($role === 'technician' && (int)$complaint['tech_id'] !== $userId) {
+            http_response_code(403);
+            echo "Forbidden";
+            return;
+        }
+
+        require BASE_PATH . '/app/views/complaints/edit.php';
+    }
+
+
+    // POST: update tech/admin fields
+    public function update()
+    {
+        $role = $_SESSION['role'] ?? null;
+        if ($role !== 'technician' && $role !== 'admin') {
+            http_response_code(403);
+            echo "Forbidden";
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo "Method Not Allowed";
+            return;
+        }
+
+        $complaintId = (int)($_POST['complaint_id'] ?? 0);
+        $technicianNotes = trim($_POST['technician_notes'] ?? '');
+        $status = trim($_POST['status'] ?? 'open');
+        $resolutionNotes = trim($_POST['resolution_notes'] ?? '');
+
+        if ($complaintId <= 0) {
+            http_response_code(400);
+            echo "Invalid id";
+            return;
+        }
+
+        // required when resolving
+        $resolutionDate = null;
+        if ($status === 'resolved') {
+            if ($resolutionNotes === '') {
+                $_SESSION['flash_error'] = "Resolution notes are required to resolve a complaint.";
+                header("Location: index.php?action=editComplaint&complaint_id=" . $complaintId);
+                exit;
+            }
+            $resolutionDate = date('Y-m-d');
+        }
+
+        $ok = $this->complaintModel->updateComplaintTechFields(
+            $complaintId,
+            $technicianNotes,
+            $status,
+            $resolutionDate,
+            $resolutionNotes
+        );
+
+        if (!$ok) {
+            http_response_code(500);
+            echo "Update failed";
+            return;
+        }
+
+        header("Location: index.php?action=techDashboard");
         exit;
     }
 }

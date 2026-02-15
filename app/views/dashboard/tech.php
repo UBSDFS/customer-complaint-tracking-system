@@ -1,58 +1,23 @@
 <?php
-// views/dashboard/tech.php
-// UI-FIRST scaffold (placeholders). Wire DB + controllers later.
-
-// --- Placeholder "logged-in tech" profile ---
-$tech = [
-    'name'  => 'Technician Name',
-    'email' => 'tech@example.com',
-    'role'  => 'Tech',
-];
-
-// --- Placeholder assigned complaints list (left sidebar queue) ---
-$assignedComplaints = [
-    ['id' => 1024, 'title' => 'Duplicate charge on account', 'submitted' => '2026-02-04', 'status' => 'open'],
-    ['id' => 1025, 'title' => 'App crashes on login',        'submitted' => '2026-02-05', 'status' => 'in_progress'],
-    ['id' => 1026, 'title' => 'Warranty status mismatch',    'submitted' => '2026-02-01', 'status' => 'resolved'],
-];
-
-// Which complaint is "selected" (right panel)
-$selectedId = isset($_GET['id']) ? (int)$_GET['id'] : $assignedComplaints[0]['id'];
-
-// --- Placeholder selected complaint detail (customer input + tech fields) ---
-$selectedComplaint = [
-    'id'            => $selectedId,
-    'status'        => 'open',
-    'submitted_at'  => '2026-02-04 09:14',
-    'customer_name' => 'J. Smith',
-    'customer_email' => 'jsmith@email.com',
-    'category'      => 'Billing',
-    'description'   => 'I was charged twice for my subscription. Please refund the duplicate charge and confirm my account is in good standing.',
-    'resolved_at'   => null, // display only; later set when resolved
-];
+// app/views/dashboard/tech.php
+// Data comes from DashboardController::tech()
+// Expected variables:
+//   $tech (name,email,role)
+//   $complaints (array of complaint rows assigned to this tech)
+//   $selectedId (int)
+//   $selectedComplaint (complaint row or null)
+//   $filterStatus (string)
 
 function statusLabel(string $status): string
 {
     return match ($status) {
         'open' => 'Open',
+        'assigned' => 'Assigned',
         'in_progress' => 'In Progress',
         'resolved' => 'Resolved',
         default => ucfirst($status),
     };
 }
-
-function statusBadgeClass(string $status): string
-{
-    return match ($status) {
-        'open' => 'badge-open',
-        'in_progress' => 'badge-progress',
-        'resolved' => 'badge-resolved',
-        default => 'badge-default',
-    };
-}
-
-// Optional UI filter (GET only for now)
-$filterStatus = $_GET['status'] ?? '';
 ?>
 <!doctype html>
 <html lang="en">
@@ -62,8 +27,7 @@ $filterStatus = $_GET['status'] ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tech Dashboard</title>
 
-    <link rel=" stylesheet" href="/customer-complaint-tracking-system/public/assets/css/dashboard.css">
-    ">
+    <link rel="stylesheet" href="/customer-complaint-tracking-system/public/assets/css/dashboard.css">
 </head>
 
 <body>
@@ -84,20 +48,20 @@ $filterStatus = $_GET['status'] ?? '';
                     ?>
                 </div>
 
-                <div class="name"><?php echo htmlspecialchars($tech['name']); ?></div>
+                <div class="name"><?php echo htmlspecialchars($tech['name'] ?? ''); ?></div>
 
                 <div class="meta">
                     <div class="meta-row">
                         <span class="meta-label">Email</span>
-                        <span class="meta-value"><?php echo htmlspecialchars($tech['email']); ?></span>
+                        <span class="meta-value"><?php echo htmlspecialchars($tech['email'] ?? ''); ?></span>
                     </div>
                     <div class="meta-row">
                         <span class="meta-label">Role</span>
-                        <span class="meta-value"><?php echo htmlspecialchars($tech['role']); ?></span>
+                        <span class="meta-value"><?php echo htmlspecialchars($tech['role'] ?? 'Technician'); ?></span>
                     </div>
                 </div>
 
-                <a class="btn secondary" href="#">Change Password</a>
+                <a class="btn secondary" href="index.php?action=changePassword">Change Password</a>
             </section>
 
             <!-- Assigned complaints -->
@@ -107,16 +71,18 @@ $filterStatus = $_GET['status'] ?? '';
                 </div>
                 <p class="subtext">Select a ticket to work.</p>
 
-                <form method="GET" action="" class="form">
-                    <input type="hidden" name="id" value="<?php echo htmlspecialchars((string)$selectedId); ?>">
+                <form method="GET" action="index.php" class="form">
+                    <input type="hidden" name="action" value="techDashboard">
+                    <input type="hidden" name="complaint_id" value="<?php echo htmlspecialchars((string)($selectedId ?? 0)); ?>">
 
                     <div class="field">
                         <label class="field-label" for="status">Filter</label>
                         <select class="select" id="status" name="status">
-                            <option value="" <?php echo $filterStatus === '' ? 'selected' : ''; ?>>All</option>
-                            <option value="open" <?php echo $filterStatus === 'open' ? 'selected' : ''; ?>>Open</option>
-                            <option value="in_progress" <?php echo $filterStatus === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                            <option value="resolved" <?php echo $filterStatus === 'resolved' ? 'selected' : ''; ?>>Resolved</option>
+                            <option value="" <?php echo ($filterStatus ?? '') === '' ? 'selected' : ''; ?>>All</option>
+                            <option value="open" <?php echo ($filterStatus ?? '') === 'open' ? 'selected' : ''; ?>>Open</option>
+                            <option value="assigned" <?php echo ($filterStatus ?? '') === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
+                            <option value="in_progress" <?php echo ($filterStatus ?? '') === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                            <option value="resolved" <?php echo ($filterStatus ?? '') === 'resolved' ? 'selected' : ''; ?>>Resolved</option>
                         </select>
                     </div>
 
@@ -126,43 +92,54 @@ $filterStatus = $_GET['status'] ?? '';
                 </form>
 
                 <div class="complaint-list queue-scroll">
-                    <?php foreach ($assignedComplaints as $c): ?>
-                        <?php
-                        if ($filterStatus !== '' && $c['status'] !== $filterStatus) continue;
-                        $active = ((int)$c['id'] === (int)$selectedId);
+                    <?php if (empty($complaints)): ?>
+                        <div class="complaint-card">
+                            <div class="details">No complaints assigned.</div>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($complaints as $c): ?>
+                            <?php
+                            if (($filterStatus ?? '') !== '' && ($c['status'] ?? '') !== ($filterStatus ?? '')) {
+                                continue;
+                            }
 
-                        // Badge class mapping to match your CSS
-                        // open -> open
-                        // in_progress -> in-progress (new)
-                        // resolved -> closed (existing) OR resolved (new alias you can use)
-                        $badgeStatusClass = match ($c['status']) {
-                            'open' => 'open',
-                            'in_progress' => 'in-progress',
-                            'resolved' => 'closed', // or 'resolved' if you prefer the alias
-                            default => 'open',
-                        };
-                        ?>
-                        <div class="complaint-card <?php echo $active ? 'active' : ''; ?>">
-                            <div class="card-top">
-                                <span class="product">#<?php echo htmlspecialchars((string)$c['id']); ?></span>
-                                <span class="badge status <?php echo htmlspecialchars($badgeStatusClass); ?>">
-                                    <?php echo htmlspecialchars(statusLabel($c['status'])); ?>
-                                </span>
-                            </div>
+                            $cid = (int)($c['complaint_id'] ?? 0);
+                            $active = ($cid === (int)($selectedId ?? 0));
 
-                            <div class="details"><?php echo htmlspecialchars($c['title']); ?></div>
+                            $badgeStatusClass = match ($c['status'] ?? 'open') {
+                                'open' => 'open',
+                                'assigned' => 'open',
+                                'in_progress' => 'in-progress',
+                                'resolved' => 'closed',
+                                default => 'open',
+                            };
 
-                            <div class="card-bottom">
-                                <span class="subtext">Submitted: <?php echo htmlspecialchars($c['submitted']); ?></span>
-                                <div class="actions">
-                                    <a class="btn secondary"
-                                        href="?id=<?php echo urlencode((string)$c['id']); ?>&status=<?php echo urlencode((string)$filterStatus); ?>">
-                                        Open
-                                    </a>
+                            $details = trim((string)($c['details'] ?? ''));
+                            $title = $details !== '' ? $details : 'Complaint';
+                            $titleShort = (mb_strlen($title) > 44) ? (mb_substr($title, 0, 44) . '…') : $title;
+                            ?>
+                            <div class="complaint-card <?php echo $active ? 'active' : ''; ?>">
+                                <div class="card-top">
+                                    <span class="product">#<?php echo htmlspecialchars((string)$cid); ?></span>
+                                    <span class="badge status <?php echo htmlspecialchars($badgeStatusClass); ?>">
+                                        <?php echo htmlspecialchars(statusLabel((string)($c['status'] ?? 'open'))); ?>
+                                    </span>
+                                </div>
+
+                                <div class="details"><?php echo htmlspecialchars($titleShort); ?></div>
+
+                                <div class="card-bottom">
+                                    <span class="subtext"></span>
+                                    <div class="actions">
+                                        <a class="btn secondary"
+                                            href="index.php?action=techDashboard&complaint_id=<?php echo urlencode((string)$cid); ?>&status=<?php echo urlencode((string)($filterStatus ?? '')); ?>">
+                                            Open
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </section>
         </aside>
@@ -176,106 +153,136 @@ $filterStatus = $_GET['status'] ?? '';
                 </div>
                 <div class="topbar-actions">
                     <span class="badge role">Tech</span>
-                    <a class="btn secondary" href="#">Logout</a>
+                    <a class="btn secondary" href="index.php?action=logout">Logout</a>
                 </div>
             </div>
 
-            <!-- Summary strip -->
-            <?php
-            $selectedBadgeStatusClass = match ($selectedComplaint['status']) {
-                'open' => 'open',
-                'in_progress' => 'in-progress',
-                'resolved' => 'closed', // or 'resolved'
-                default => 'open',
-            };
-            ?>
-            <div class="summary">
-                <div class="summary-item">
-                    <span class="summary-label">Ticket</span>
-                    <span class="summary-value">#<?php echo htmlspecialchars((string)$selectedComplaint['id']); ?></span>
+            <?php if (!$selectedComplaint): ?>
+                <div class="complaint-card">
+                    <div class="details">No complaint selected (or you don’t have access to that complaint).</div>
                 </div>
+            <?php else: ?>
+                <?php
+                $selectedBadgeStatusClass = match ($selectedComplaint['status'] ?? 'open') {
+                    'open' => 'open',
+                    'assigned' => 'open',
+                    'in_progress' => 'in-progress',
+                    'resolved' => 'closed',
+                    default => 'open',
+                };
 
-                <div class="summary-item">
-                    <span class="summary-label">Status</span>
-                    <span class="badge status <?php echo htmlspecialchars($selectedBadgeStatusClass); ?>">
-                        <?php echo htmlspecialchars(statusLabel($selectedComplaint['status'])); ?>
-                    </span>
-                </div>
-
-                <div class="summary-item">
-                    <span class="summary-label">Resolution Date</span>
-                    <span class="summary-value">
-                        <?php echo $selectedComplaint['resolved_at'] ? htmlspecialchars($selectedComplaint['resolved_at']) : '—'; ?>
-                    </span>
-                </div>
-            </div>
-
-            <!-- Customer complaint (read-only) -->
-            <div class="complaint-card">
-                <div class="card-top">
-                    <span class="badge type">Customer Input</span>
-                    <span class="subtext">Submitted: <?php echo htmlspecialchars($selectedComplaint['submitted_at']); ?></span>
-                </div>
-
-                <div class="product"><?php echo htmlspecialchars($selectedComplaint['category']); ?></div>
-
-                <div class="details">
-                    <strong><?php echo htmlspecialchars($selectedComplaint['customer_name']); ?></strong>
-                    <span class="subtext"> • <?php echo htmlspecialchars($selectedComplaint['customer_email']); ?></span>
-                </div>
-
-                <div class="details readonly">
-                    <?php echo htmlspecialchars($selectedComplaint['description']); ?>
-                </div>
-            </div>
-
-            <!-- Technician update -->
-            <div class="complaint-card">
-                <div class="card-top">
-                    <span class="badge type">Technician Update</span>
-                    <span class="subtext">Resolution notes required to resolve</span>
-                </div>
-
-                <form method="POST" action="#" class="form">
-                    <input type="hidden" name="complaint_id" value="<?php echo htmlspecialchars((string)$selectedComplaint['id']); ?>">
-
-                    <div class="field">
-                        <label class="field-label" for="tech_notes">Technician Notes / Analysis</label>
-                        <textarea class="textarea" id="tech_notes" name="tech_notes" rows="5"
-                            placeholder="Enter investigation steps, findings, and internal notes..."></textarea>
+                $resolutionDate = $selectedComplaint['complaint_resolution_date'] ?? null;
+                ?>
+                <!-- Summary strip -->
+                <div class="summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Ticket</span>
+                        <span class="summary-value">#<?php echo htmlspecialchars((string)$selectedComplaint['complaint_id']); ?></span>
                     </div>
 
-                    <div class="grid-2">
+                    <div class="summary-item">
+                        <span class="summary-label">Status</span>
+                        <span class="badge status <?php echo htmlspecialchars($selectedBadgeStatusClass); ?>">
+                            <?php echo htmlspecialchars(statusLabel((string)($selectedComplaint['status'] ?? 'open'))); ?>
+                        </span>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-label">Resolution Date</span>
+                        <span class="summary-value">
+                            <?php echo $resolutionDate ? htmlspecialchars((string)$resolutionDate) : '—'; ?>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Customer complaint (read-only) -->
+                <div class="complaint-card">
+                    <div class="card-top">
+                        <span class="badge type">Customer Input</span>
+                        <span class="subtext">Complaint ID: <?php echo htmlspecialchars((string)$selectedComplaint['complaint_id']); ?></span>
+                    </div>
+
+                    <div class="product">
+                        Complaint Type ID: <?php echo htmlspecialchars((string)($selectedComplaint['complaint_type_id'] ?? '')); ?>
+                    </div>
+
+                    <div class="details readonly">
+                        <?php echo htmlspecialchars((string)($selectedComplaint['details'] ?? '')); ?>
+                    </div>
+
+                    <?php if (!empty($selectedComplaint['image_path'])): ?>
+                        <div class="details">
+                            <a class="btn secondary" href="<?php echo htmlspecialchars((string)$selectedComplaint['image_path']); ?>" target="_blank" rel="noopener">
+                                View Uploaded Image
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Technician update -->
+                <div class="complaint-card">
+                    <div class="card-top">
+                        <span class="badge type">Technician Update</span>
+                        <span class="subtext">Resolution notes required to resolve</span>
+                    </div>
+
+                    <?php if (!empty($_SESSION['flash_error'])): ?>
+                        <div class="details" style="color:#b91c1c;">
+                            <?php
+                            echo htmlspecialchars($_SESSION['flash_error']);
+                            unset($_SESSION['flash_error']);
+                            ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST" action="index.php?action=updateComplaint" class="form">
+                        <input type="hidden" name="complaint_id" value="<?php echo htmlspecialchars((string)$selectedComplaint['complaint_id']); ?>">
+
                         <div class="field">
-                            <label class="field-label" for="status_update">Status</label>
-                            <select class="select" id="status_update" name="status">
-                                <option value="open">Open</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="resolved">Resolved</option>
-                            </select>
+                            <label class="field-label" for="technician_notes">Technician Notes / Analysis</label>
+                            <textarea class="textarea" id="technician_notes" name="technician_notes" rows="5"
+                                placeholder="Enter investigation steps, findings, and internal notes..."><?php
+                                                                                                            echo htmlspecialchars((string)($selectedComplaint['technician_notes'] ?? ''));
+                                                                                                            ?></textarea>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="field">
+                                <label class="field-label" for="status_update">Status</label>
+                                <select class="select" id="status_update" name="status">
+                                    <?php $currentStatus = (string)($selectedComplaint['status'] ?? 'open'); ?>
+                                    <option value="open" <?php echo $currentStatus === 'open' ? 'selected' : ''; ?>>Open</option>
+                                    <option value="assigned" <?php echo $currentStatus === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
+                                    <option value="in_progress" <?php echo $currentStatus === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                                    <option value="resolved" <?php echo $currentStatus === 'resolved' ? 'selected' : ''; ?>>Resolved</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label class="field-label" for="resolved_at">Resolution Date</label>
+                                <input class="input" id="resolved_at" type="text"
+                                    value="<?php echo $resolutionDate ? htmlspecialchars((string)$resolutionDate) : ''; ?>"
+                                    placeholder="Auto-set when resolved" disabled>
+                            </div>
                         </div>
 
                         <div class="field">
-                            <label class="field-label" for="resolved_at">Resolution Date</label>
-                            <input class="input" id="resolved_at" type="text" value="" placeholder="Auto-set when resolved" disabled>
+                            <label class="field-label" for="resolution_notes">
+                                Resolution Notes <span class="required">*</span>
+                            </label>
+                            <textarea class="textarea" id="resolution_notes" name="resolution_notes" rows="5"
+                                placeholder="Required if setting status to Resolved. What action resolved the complaint?"><?php
+                                                                                                                            echo htmlspecialchars((string)($selectedComplaint['resolution_notes'] ?? ''));
+                                                                                                                            ?></textarea>
+                            <p class="subtext">This field is required to resolve the complaint.</p>
                         </div>
-                    </div>
 
-                    <div class="field">
-                        <label class="field-label" for="resolution_notes">
-                            Resolution Notes <span class="required">*</span>
-                        </label>
-                        <textarea class="textarea" id="resolution_notes" name="resolution_notes" rows="5"
-                            placeholder="Required if setting status to Resolved. What action resolved the complaint?"></textarea>
-                        <p class="subtext">This field is required to resolve the complaint.</p>
-                    </div>
-
-                    <div class="actions">
-                        <button class="btn secondary" type="submit" name="save_changes">Save Changes</button>
-                        <button class="btn primary" type="submit" name="resolve">Resolve Complaint</button>
-                    </div>
-                </form>
-            </div>
+                        <div class="actions">
+                            <button class="btn primary" type="submit">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            <?php endif; ?>
 
         </section>
     </main>

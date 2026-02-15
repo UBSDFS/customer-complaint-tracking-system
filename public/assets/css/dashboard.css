@@ -100,10 +100,21 @@ a {
   background: #eff6ff;
   color: #2563eb;
   border: 1px solid #dbeafe;
+  
 }
 
 .btn.secondary:hover {
   filter: brightness(0.98);
+}
+.btn.tertiary {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+  padding:2px 8px;
+  margin-top: 20px;
+}
+.btn.tertiary:hover {
+  filter: brightness(1.02);
 }
 
 /* ---------- Work Area ---------- */

@@ -392,4 +392,105 @@ class ComplaintModel
 
         return ['ok' => true, 'types' => $types];
     }
+    public function getComplaintsAssignedToTech(int $techId): array
+    {
+        $sql = "SELECT * FROM complaints WHERE tech_id = ? ORDER BY complaint_id DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $techId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $rows = [];
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+    public function updateComplaintTechFields(
+        int $complaintId,
+        string $technicianNotes,
+        string $status,
+        ?string $resolutionDate,
+        string $resolutionNotes
+    ): bool {
+        $sql = "UPDATE complaints
+            SET technician_notes = ?,
+                status = ?,
+                complaint_resolution_date = ?,
+                resolution_notes = ?
+            WHERE complaint_id = ?";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param(
+            "ssssi",
+            $technicianNotes,
+            $status,
+            $resolutionDate,
+            $resolutionNotes,
+            $complaintId
+        );
+
+        return $stmt->execute();
+    }
+    public function getUnassignedOpenComplaints(): array
+    {
+        $sql = "SELECT c.*, ct.name AS complaint_type_name
+            FROM complaints c
+            JOIN complaint_types ct ON c.complaint_type_id = ct.complaint_type_id
+            WHERE c.tech_id IS NULL
+              AND c.status IN ('open','assigned','in_progress')
+            ORDER BY c.complaint_id DESC";
+
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+
+        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+
+        $result = $stmt->get_result();
+        $rows = [];
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+
+        return ['ok' => true, 'complaints' => $rows];
+    }
+    public function getOpenComplaintsWithTech(): array
+    {
+        $sql = "SELECT
+                c.complaint_id,
+                c.status,
+                c.complaint_resolution_date,
+                c.details,
+                c.image_path,
+                c.customer_id,
+                c.tech_id,
+                ct.name AS complaint_type_name,
+
+                -- customer name
+                CONCAT(cp.first_name, ' ', cp.last_name) AS customer_name,
+
+                -- tech name (nullable)
+                CONCAT(ep.first_name, ' ', ep.last_name) AS tech_name
+
+            FROM complaints c
+            JOIN complaint_types ct ON c.complaint_type_id = ct.complaint_type_id
+            JOIN customer_profiles cp ON c.customer_id = cp.user_id
+            LEFT JOIN employee_profiles ep ON c.tech_id = ep.user_id
+
+            WHERE c.status IN ('open','assigned','in_progress')
+            ORDER BY c.complaint_id DESC";
+
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+
+        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+
+        $result = $stmt->get_result();
+        $rows = [];
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+
+        return ['ok' => true, 'complaints' => $rows];
+    }
 }
