@@ -3,6 +3,11 @@ session_start();
 
 define('BASE_PATH', realpath(__DIR__ . '/..'));
 
+// SECURITY
+//require_once __DIR__ . '/../app/util/security.php';
+//Security::checkHTTPS();
+
+
 // MODELS
 require_once __DIR__ . '/../app/model/database.php';
 require_once __DIR__ . '/../app/model/userModel.php';

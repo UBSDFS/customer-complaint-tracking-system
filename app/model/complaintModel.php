@@ -13,7 +13,7 @@ class ComplaintModel
         int $customer_id,
         int $complaint_type_id,
         string $details,
-        ?int $product_id = null,
+        int $product_id,
         ?string $image_path = null
     ): array {
         if ($customer_id <= 0 || $complaint_type_id <= 0) {
@@ -492,5 +492,25 @@ class ComplaintModel
         }
 
         return ['ok' => true, 'complaints' => $rows];
+    }
+
+public function getProductTypes(): array
+    {
+        $sql = "SELECT product_id, name
+                FROM products
+                ORDER BY product_id";
+
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+
+        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+
+        $result = $stmt->get_result();
+        $types = [];
+        while ($row = $result->fetch_assoc()) {
+            $types[] = $row;
+        }
+
+        return ['ok' => true, 'types' => $types];
     }
 }
