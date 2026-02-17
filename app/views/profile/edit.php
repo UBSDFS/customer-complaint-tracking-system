@@ -1,4 +1,4 @@
-<?php
+<?php //Remove this debug code when done
 echo "<pre>";
 print_r($user);
 echo "</pre>";
