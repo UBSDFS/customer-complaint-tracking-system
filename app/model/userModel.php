@@ -70,7 +70,7 @@ class UserModel
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    /*USER UPDATES (USERS TABLE)*/
+    /*USER UPDATES */
 
     public function updateUserEmail(int $userId, string $email): array
     {
@@ -79,7 +79,7 @@ class UserModel
             return ['success' => false, 'error' => 'Invalid email address.'];
         }
 
-        // Ensure unique email (excluding current user)
+        // Ensure unique email 
         $checkSql = "SELECT user_id FROM users WHERE email = ? AND user_id <> ?";
         $check = $this->db->prepare($checkSql);
         if ($check) {
@@ -109,7 +109,7 @@ class UserModel
         return ['success' => true];
     }
 
-    /*CUSTOMER PROFILE (customer_profiles) */
+    /*CUSTOMER PROFILE  */
 
     public function getCustomerById(int $userId): ?array
     {
@@ -196,7 +196,7 @@ class UserModel
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    /*EMPLOYEE PROFILE (employee_profiles) */
+    /*EMPLOYEE PROFILE  */
 
     public function getEmployeeById(int $userId): ?array
     {
@@ -364,7 +364,7 @@ class UserModel
             if (!$p->execute()) throw new Exception($p->error);
             $p->close();
 
-            // If this email existed as a customer in old data, remove customer profile row
+
             $d = $this->db->prepare("DELETE FROM customer_profiles WHERE user_id = ?");
             if (!$d) throw new Exception($this->db->error);
             $d->bind_param("i", $userId);
@@ -401,7 +401,7 @@ class UserModel
         return ['success' => true];
     }
 
-    /*REGISTRATION (CUSTOMER CREATE)*/
+    /*REGISTRATION*/
 
     public function registerCustomer(
         string $email,
@@ -517,8 +517,7 @@ class UserModel
                 $d->execute();
                 $d->close();
 
-                // Ensure customer profile exists (customer_profiles has NOT NULL fields)
-                // Use placeholders for to admin must update later.
+
                 $ins = $this->db->prepare(
                     "INSERT INTO customer_profiles (user_id, first_name, last_name, street_address, city, state, zip, phone)
                      VALUES (?, ?, ?, 'TBD', 'TBD', 'NA', '00000', '0000000000')
@@ -539,7 +538,7 @@ class UserModel
                 $d->execute();
                 $d->close();
 
-                // Ensure employee profile exists (employee_profiles first/last are NOT NULL)
+                // Ensure employee profile exists
                 $ins = $this->db->prepare(
                     "INSERT INTO employee_profiles (user_id, first_name, last_name, phone_ext, level)
                      VALUES (?, ?, ?, NULL, ?)

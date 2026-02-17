@@ -86,7 +86,7 @@ class ComplaintController
             return;
         }
 
-        
+
         $product_id = 1;
 
         $result = $this->complaintModel->createComplaint(
@@ -180,7 +180,7 @@ class ComplaintController
 
         $userId = (int)($_SESSION['user_id'] ?? 0);
 
-        // tech must be assigned to it (admin can bypass)
+
         if ($role === 'technician' && (int)$complaint['tech_id'] !== $userId) {
             http_response_code(403);
             echo "Forbidden";
@@ -218,7 +218,7 @@ class ComplaintController
             return;
         }
 
-        
+
         $resolutionDate = null;
         if ($status === 'resolved') {
             if ($resolutionNotes === '') {

@@ -183,16 +183,16 @@ class ComplaintModel
             return ['ok' => false, 'error' => 'New note cannot be empty.'];
         }
 
-        
+
         $author_label = $author_label !== null ? trim($author_label) : null;
 
-        
+
         if (!$this->db->begin_transaction()) {
             return ['ok' => false, 'error' => 'Failed to start transaction: ' . $this->db->error];
         }
 
         try {
-            
+
             $selectSql = "SELECT details FROM complaints WHERE complaint_id = ? FOR UPDATE";
             $selectStmt = $this->db->prepare($selectSql);
             if (!$selectStmt) {
@@ -253,7 +253,7 @@ class ComplaintModel
         }
     }
 
-    
+
     public function deleteComplaint(int $complaint_id): array
     {
         if ($complaint_id <= 0) {
@@ -469,7 +469,7 @@ class ComplaintModel
                 -- customer name
                 CONCAT(cp.first_name, ' ', cp.last_name) AS customer_name,
 
-                -- tech name (nullable)
+                -- tech name 
                 CONCAT(ep.first_name, ' ', ep.last_name) AS tech_name
 
             FROM complaints c
