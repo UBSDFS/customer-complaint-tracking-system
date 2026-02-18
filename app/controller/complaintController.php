@@ -17,15 +17,19 @@ class ComplaintController
         $typesResult = $this->complaintModel->getComplaintTypes();
         $types = $typesResult['ok'] ? $typesResult['types'] : [];
 
+        $productsResult = $this->complaintModel->getProductTypes();
+        $products = $productsResult['ok'] ? $productsResult['products'] : [];
+
         $errors = [];
-        $old = ['complaintTypeId' => '', 'details' => ''];
+        $old = ['complaintTypeId' => '', 'details' => '', 'productId' => ''];
 
         require __DIR__ . '/../views/complaintForm/newComplaintForm.php';
     }
-
+ 
     // POST: handle submit
     public function store()
     {
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: index.php?action=newComplaint");
             exit;
@@ -36,13 +40,20 @@ class ComplaintController
             header("Location: index.php?action=showLogin");
             exit;
         }
+        
 
         $complaint_type_id = (int)($_POST['complaintTypeId'] ?? 0);
         $details = trim($_POST['details'] ?? '');
+        $product_id = (int)($_POST["productId"] ?? 0);
+
 
         $errors = [];
         if ($complaint_type_id <= 0) $errors[] = "Please select a complaint type.";
         if ($details === '') $errors[] = "Description is required.";
+        if ($product_id <= 0) $errors[] = 'Please select a product type.';
+
+        
+        
 
         $image_path = null;
         if (!empty($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
@@ -81,13 +92,16 @@ class ComplaintController
             $typesResult = $this->complaintModel->getComplaintTypes();
             $types = $typesResult['ok'] ? $typesResult['types'] : [];
 
-            $old = ['complaintTypeId' => $complaint_type_id, 'details' => $details];
+            $productsResult = $this->complaintModel->getProductTypes();
+            $products = $productsResult['ok'] ? $productsResult['products'] : [];
+
+            $old = ['complaintTypeId' => $complaint_type_id, 'details' => $details, 'productId' => $product_id];
             require __DIR__ . '/../views/complaintForm/newComplaintForm.php';
             return;
         }
 
 
-        $product_id = 1;
+        // $product_id = 1;
 
         $result = $this->complaintModel->createComplaint(
             $customer_id,
@@ -101,8 +115,11 @@ class ComplaintController
             $typesResult = $this->complaintModel->getComplaintTypes();
             $types = $typesResult['ok'] ? $typesResult['types'] : [];
 
+            $productsResult = $this->complaintModel->getProductTypes();
+            $products = $productsResult['ok'] ? $productsResult['products'] : [];
+
             $errors[] = $result['error'];
-            $old = ['complaintTypeId' => $complaint_type_id, 'details' => $details];
+            $old = ['complaintTypeId' => $complaint_type_id, 'details' => $details, 'productId' => $product_id];
             require __DIR__ . '/../views/complaintForm/newComplaintForm.php';
             return;
         }

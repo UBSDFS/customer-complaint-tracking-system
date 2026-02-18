@@ -19,6 +19,16 @@ class DashboardController
         }
 
         $role = $_SESSION['role'] ?? 'customer';
+
+
+        if ($role === 'tech') {
+            return $this->tech();
+        }
+        if ($role === 'admin') {
+            header('Location: index.php?action=adminDashboard'); // <-- use your real action name
+            exit;
+        }
+
         $userId = (int)$_SESSION['user_id'];
 
         $user = [
@@ -27,7 +37,6 @@ class DashboardController
             'email'       => $_SESSION['email'] ?? '',
             'phoneNumber' => $_SESSION['phoneNumber'] ?? ''
         ];
-
         $complaints = [];
         $summary = [
             'open' => 0,

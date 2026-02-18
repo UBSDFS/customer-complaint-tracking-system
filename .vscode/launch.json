@@ -2,14 +2,14 @@
         "name": "Launch Chrome",
         "request": "launch",
         "type": "chrome",
-        "url": "http://localhost/customer-complaint-tracking-system/public/index.php",
+        "url": "https://localhost/customer-complaint-tracking-system/public/index.php",
         "webRoot": "${workspaceFolder}",
         "configurations": [
         {
             "name": "Launch Chrome",
             "request": "launch",
             "type": "chrome",
-            "url": "http://localhost/customer-complaint-tracking-system/public/index.php",
+            "url": "https://localhost/customer-complaint-tracking-system/public/index.php",
             "webRoot": "${workspaceFolder}"
         }
         ],

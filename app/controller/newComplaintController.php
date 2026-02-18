@@ -10,12 +10,17 @@ class NewComplaintController
 
     public function create()
     {
+
         $typesResult = $this->complaintModel->getComplaintTypes();
         $types = $typesResult['ok'] ? $typesResult['types'] : [];
+
+        $productsResult = $this->complaintModel->getProductTypes();
+        $products = $productsResult['ok'] ? $productsResult['products'] : [];
 
         $errors = [];
         $old = [
             'complaintTypeId' => '',
+            'productId' => '',
             'details' => ''
         ];
 

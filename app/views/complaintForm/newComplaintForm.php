@@ -1,7 +1,8 @@
 <?php
 $types  = $types  ?? [];
+$products = $products ?? [];
 $errors = $errors ?? [];
-$old    = $old    ?? ['complaintTypeId' => '', 'details' => ''];
+$old    = $old    ?? ['complaintTypeId' => '', 'details' => '', 'productId' => ''];
 ?>
 
 <!DOCTYPE html>
@@ -44,6 +45,19 @@ $old    = $old    ?? ['complaintTypeId' => '', 'details' => ''];
                             <option value="<?= (int)$t['complaint_type_id'] ?>"
                                 <?= ((string)$old['complaintTypeId'] === (string)$t['complaint_type_id']) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($t['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="productId">Product Type:</label>
+                    <select id="productId" name="productId" required>
+                        <option value="">-- Select a product --</option>
+                        <?php foreach ($products as $p): ?>
+                            <option value="<?= (int)$p['product_id'] ?>"
+                                <?= ((string)$old['productId'] === (string)$p['product_id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($p['name']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
