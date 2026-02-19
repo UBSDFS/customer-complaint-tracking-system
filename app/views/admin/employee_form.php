@@ -1,7 +1,14 @@
 <?php
 $isEdit = !empty($employee);
-$userId = $isEdit ? (int)$employee['user_id'] : 0;
+$userId = $isEdit ? (int) $employee['user_id'] : 0;
 $action = $isEdit ? 'adminEmployeeUpdate' : 'adminEmployeeStore';
+
+$sessionUserId = (int)($_SESSION['user_id'] ?? 0);
+$isSelfEdit = $isEdit && ($userId === $sessionUserId);
+
+// If editing yourself AND your current level is admin
+$isAdminSelfEdit = $isSelfEdit && (($employee['level'] ?? '') === 'admin');
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -39,7 +46,7 @@ $action = $isEdit ? 'adminEmployeeUpdate' : 'adminEmployeeStore';
             <div class="complaint-card">
                 <form method="POST" action="index.php?action=<?php echo $action; ?>" class="form">
                     <?php if ($isEdit): ?>
-                        <input type="hidden" name="user_id" value="<?php echo htmlspecialchars((string)$userId); ?>">
+                        <input type="hidden" name="user_id" value="<?php echo htmlspecialchars((string) $userId); ?>">
                     <?php endif; ?>
 
                     <div class="grid-2">
@@ -82,15 +89,24 @@ $action = $isEdit ? 'adminEmployeeUpdate' : 'adminEmployeeStore';
                         <div class="field">
                             <label class="field-label">Level</label>
                             <?php $lvl = $employee['level'] ?? 'tech'; ?>
-                            <select class="select" name="level">
+
+                            <select class="select" name="level" <?php echo $isAdminSelfEdit ? 'disabled' : ''; ?>>
                                 <option value="tech" <?php echo $lvl === 'tech' ? 'selected' : ''; ?>>Tech</option>
                                 <option value="admin" <?php echo $lvl === 'admin' ? 'selected' : ''; ?>>Admin</option>
                             </select>
+
+                            <?php if ($isAdminSelfEdit): ?>
+                                <p class="subtext">Admins cannot change their own level.</p>
+                                <!-- IMPORTANT: disabled inputs don't submit, so preserve the value -->
+                                <input type="hidden" name="level" value="admin">
+                            <?php endif; ?>
                         </div>
+
                     </div>
 
                     <div class="actions">
-                        <button class="btn primary" type="submit"><?php echo $isEdit ? 'Save Changes' : 'Create Employee'; ?></button>
+                        <button class="btn primary"
+                            type="submit"><?php echo $isEdit ? 'Save Changes' : 'Create Employee'; ?></button>
                     </div>
                 </form>
             </div>

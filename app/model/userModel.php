@@ -278,6 +278,42 @@ class UserModel
         return ['success' => true];
     }
 
+
+    // only used for self-service profile updates where we don't want employees changing their own level
+    public function updateEmployeeSelfProfile(
+    int $userId,
+    string $firstName,
+    string $lastName,
+    ?string $phoneExt
+): array {
+    $firstName = trim($firstName);
+    $lastName  = trim($lastName);
+    $phoneExt  = $phoneExt !== null ? trim($phoneExt) : null;
+
+    if ($firstName === '' || $lastName === '') {
+        return ['success' => false, 'error' => 'First and last name are required.'];
+    }
+
+    $sql = "UPDATE employee_profiles
+            SET first_name = ?, last_name = ?, phone_ext = ?
+            WHERE user_id = ?";
+
+    $stmt = $this->db->prepare($sql);
+    if (!$stmt) return ['success' => false, 'error' => $this->db->error];
+
+    $stmt->bind_param("sssi", $firstName, $lastName, $phoneExt, $userId);
+
+    if (!$stmt->execute()) {
+        $err = $stmt->error;
+        $stmt->close();
+        return ['success' => false, 'error' => $err];
+    }
+
+    $stmt->close();
+    return ['success' => true];
+}
+
+
     public function getAllEmployeesWithProfile(): array
     {
         $sql = "SELECT u.user_id, u.email, u.role,
