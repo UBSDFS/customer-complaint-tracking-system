@@ -55,7 +55,7 @@ function statusLabel(string $status): string
                     </div>
                 </div>
 
-                <a class="btn secondary" href="index.php?action=changePassword">Change Password</a>
+                <a class="btn secondary" href="index.php?action=profile">Edit Profile</a>
             </section>
 
             <!-- Assigned complaints -->

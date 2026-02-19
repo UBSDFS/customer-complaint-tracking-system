@@ -70,8 +70,8 @@ class AdminController
             return;
         }
 
-        $complaintId = (int)($_POST['complaint_id'] ?? 0);
-        $techId = (int)($_POST['tech_id'] ?? 0);
+        $complaintId = (int) ($_POST['complaint_id'] ?? 0);
+        $techId = (int) ($_POST['tech_id'] ?? 0);
 
         if ($complaintId <= 0 || $techId <= 0) {
             http_response_code(400);
@@ -114,9 +114,9 @@ class AdminController
         }
 
         $email = strtolower(trim($_POST['email'] ?? ''));
-        $password = (string)($_POST['password'] ?? '');
+        $password = (string) ($_POST['password'] ?? '');
         $first = trim($_POST['first_name'] ?? '');
-        $last  = trim($_POST['last_name'] ?? '');
+        $last = trim($_POST['last_name'] ?? '');
         $phoneExt = trim($_POST['phone_ext'] ?? '');
         $level = trim($_POST['level'] ?? 'tech'); // tech|admin
 
@@ -137,7 +137,7 @@ class AdminController
     {
         $this->requireAdmin();
 
-        $userId = (int)($_GET['user_id'] ?? 0);
+        $userId = (int) ($_GET['user_id'] ?? 0);
         if ($userId <= 0) {
             http_response_code(400);
             echo "Invalid user_id";
@@ -164,12 +164,31 @@ class AdminController
             return;
         }
 
-        $userId = (int)($_POST['user_id'] ?? 0);
+        $userId = (int) ($_POST['user_id'] ?? 0);
         $email = strtolower(trim($_POST['email'] ?? ''));
         $first = trim($_POST['first_name'] ?? '');
-        $last  = trim($_POST['last_name'] ?? '');
+        $last = trim($_POST['last_name'] ?? '');
         $phoneExt = trim($_POST['phone_ext'] ?? '');
         $level = trim($_POST['level'] ?? 'tech'); // tech|admin
+
+        $selfId = (int) ($_SESSION['user_id'] ?? 0);
+
+        
+        $currentUser = $this->userModel->getUserById($userId);
+        if (!$currentUser) {
+            $_SESSION['flash_error'] = "User not found.";
+            header("Location: index.php?action=adminEmployees");
+            exit;
+        }
+
+        //Prevent admin from changing their own role (could lock themselves out of admin access, if an admin needs to change themself to a tech, they should have another admin do it for them)
+        if ($userId === $selfId) {
+            if ($currentUser['role'] === 'admin' && $level !== 'admin') {
+                $_SESSION['flash_error'] = "You cannot change your own role from Admin.";
+                header("Location: index.php?action=adminEmployeeEdit&user_id={$userId}");
+                exit;
+            }
+        }
 
         if ($userId <= 0) {
             $_SESSION['flash_error'] = "Invalid user id.";
@@ -210,7 +229,7 @@ class AdminController
     {
         $this->requireAdmin();
 
-        $userId = (int)($_GET['user_id'] ?? 0);
+        $userId = (int) ($_GET['user_id'] ?? 0);
         if ($userId <= 0) {
             http_response_code(400);
             echo "Invalid user_id";
@@ -237,11 +256,11 @@ class AdminController
             return;
         }
 
-        $userId = (int)($_POST['user_id'] ?? 0);
+        $userId = (int) ($_POST['user_id'] ?? 0);
 
         $email = strtolower(trim($_POST['email'] ?? ''));
         $first = trim($_POST['first_name'] ?? '');
-        $last  = trim($_POST['last_name'] ?? '');
+        $last = trim($_POST['last_name'] ?? '');
         $street = trim($_POST['street_address'] ?? '');
         $city = trim($_POST['city'] ?? '');
         $state = strtoupper(trim($_POST['state'] ?? ''));
@@ -283,7 +302,7 @@ class AdminController
             return;
         }
 
-        $userId = (int)($_POST['user_id'] ?? 0);
+        $userId = (int) ($_POST['user_id'] ?? 0);
         $newRole = trim($_POST['role'] ?? '');
 
         $r = $this->userModel->changeUserRole($userId, $newRole);

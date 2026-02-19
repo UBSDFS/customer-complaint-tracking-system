@@ -30,6 +30,7 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
                 </div>
                 <div class="topbar-actions">
                     <span class="badge role">Admin</span>
+                    <a class="btn secondary" href="index.php?action=profile">Edit Profile</a>
                     <a class="btn secondary" href="index.php?action=logout">Logout</a>
                 </div>
             </div>
