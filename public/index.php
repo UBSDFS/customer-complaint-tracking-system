@@ -1,5 +1,9 @@
 <?php
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+date_default_timezone_set('America/New_York');
 
 define('BASE_PATH', realpath(__DIR__ . '/..'));
 
