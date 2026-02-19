@@ -1,57 +1,140 @@
-<h2>Edit Profile</h2>
+<div class="profile-edit">
+    <h2>Edit Profile</h2>
 
-<form method="POST" action="index.php?action=updateProfile">
+    <form method="POST" action="index.php?action=updateProfile">
 
-    <label>Email</label>
-    <input type="text" name="email"
-        value="<?= htmlspecialchars($user['email'] ?? '') ?>">
+        <div class="field">
+            <label>Email</label>
+            <input type="text" name="email"
+                value="<?= htmlspecialchars($user['email'] ?? '') ?>">
+        </div>
 
-    <br><br>
+        <div class="field">
+            <label>First Name</label>
+            <input type="text" name="first_name"
+                value="<?= htmlspecialchars($user['first_name'] ?? '') ?>">
+        </div>
 
-    <label>First Name</label>
-    <input type="text" name="first_name"
-        value="<?= htmlspecialchars($user['first_name'] ?? '') ?>">
+        <div class="field">
+            <label>Last Name</label>
+            <input type="text" name="last_name"
+                value="<?= htmlspecialchars($user['last_name'] ?? '') ?>">
+        </div>
 
-    <br><br>
+        <div class="field">
+            <label>Street Address</label>
+            <input type="text" name="street_address"
+                value="<?= htmlspecialchars($user['street_address'] ?? '') ?>">
+        </div>
 
-    <label>Last Name</label>
-    <input type="text" name="last_name"
-        value="<?= htmlspecialchars($user['last_name'] ?? '') ?>">
+        <div class="field">
+            <label>City</label>
+            <input type="text" name="city"
+                value="<?= htmlspecialchars($user['city'] ?? '') ?>">
+        </div>
 
-    <br><br>
-    <label>Street Address</label>
-    <input type="text" name="street_address"
-        value="<?= htmlspecialchars($user['street_address'] ?? '') ?>">
+        <div class="field">
+            <label>State</label>
+            <input type="text" name="state"
+                value="<?= htmlspecialchars($user['state'] ?? '') ?>">
+        </div>
 
-    <br><br>
-    <label>City</label>
-    <input type="text" name="city"
-        value="<?= htmlspecialchars($user['city'] ?? '') ?>">
+        <div class="field">
+            <label>Zip Code</label>
+            <input type="text" name="zip"
+                value="<?= htmlspecialchars($user['zip'] ?? '') ?>">
+        </div>
 
-    <br><br>
-    <label>State</label>
-    <input type="text" name="state"
-        value="<?= htmlspecialchars($user['state'] ?? '') ?>">
+        <div class="field">
+            <label>Phone Number</label>
+            <input type="text" name="phone"
+                value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+        </div>
 
-    <br><br>
-    <label>Zip Code</label>
-    <input type="text" name="zip"
-        value="<?= htmlspecialchars($user['zip'] ?? '') ?>">
+        <div class="field">
+            <label>Password</label>
+            <input type="password" name="password">
+        </div>
 
-    <label>Phone Number</label>
-    <input type="text" name="phone"
-        value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+        <div class="actions">
+            <button type="submit">Save Changes</button>
+            <a class="cancel-link" href="index.php?action=dashboard">Cancel</a>
+        </div>
 
-    <br><br>
-    <label>Password</label>
-    <input type="password" name="password"
-        value="<?= htmlspecialchars($user['password'] ?? '') ?>">
+    </form>
+</div>
 
-    <br><br>
 
-    <button type="submit">Save Changes</button>
-</form>
+<style>
+    .profile-edit {
+        max-width: 520px;
+        margin: 40px auto;
+        padding: 28px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
+    }
 
-<br>
+    .profile-edit h2 {
+        margin-bottom: 20px;
+        font-size: 22px;
+    }
 
-<a href="index.php?action=dashboard">Cancel</a>
+    .profile-edit .field {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .profile-edit label {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #374151;
+    }
+
+    .profile-edit input {
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 14px;
+        transition: border 0.2s ease;
+    }
+
+    .profile-edit input:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+
+    .profile-edit .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 12px;
+    }
+
+    .profile-edit button {
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: none;
+        background: #2563eb;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .profile-edit button:hover {
+        background: #1e40af;
+    }
+
+    .profile-edit .cancel-link {
+        align-self: center;
+        font-size: 14px;
+        color: #6b7280;
+        text-decoration: none;
+    }
+
+    .profile-edit .cancel-link:hover {
+        text-decoration: underline;
+    }
+</style>
