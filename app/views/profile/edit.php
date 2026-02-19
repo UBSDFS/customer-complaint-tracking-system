@@ -1,8 +1,5 @@
-<?php //Remove this debug code when done
-echo "<pre>";
-print_r($user);
-echo "</pre>";
-?>
+<?php
+
 
 <h2>Edit Profile</h2>
 
