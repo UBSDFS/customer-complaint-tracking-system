@@ -131,6 +131,29 @@ class UserModel
         return $row;
     }
 
+    public function updateUserPassword(int $userId, string $newPassword): array
+    {
+        if ($newPassword === '') {
+            return ['success' => false, 'error' => 'Password cannot be empty.'];
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $sql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) return ['success' => false, 'error' => $this->db->error];
+
+        $stmt->bind_param("si", $hash, $userId);
+
+        if (!$stmt->execute()) {
+            $err = $stmt->error;
+            $stmt->close();
+            return ['success' => false, 'error' => $err];
+        }
+
+        $stmt->close();
+        return ['success' => true];
+    }
     public function updateCustomerProfile(
         int $userId,
         string $firstName,

@@ -26,14 +26,34 @@ class ProfileController
             exit;
         }
 
-        $userId = (int)$_SESSION['user_id'];
+        $userId = (int) $_SESSION['user_id'];
 
         $email = $_POST['email'] ?? '';
         $first = $_POST['first_name'] ?? '';
         $last = $_POST['last_name'] ?? '';
+        $street_address = $_POST['street_address'] ?? '';
+        $city = $_POST['city'] ?? '';
+        $state = $_POST['state'] ?? '';
+        $zip = $_POST['zip'] ?? '';
+        $phone = $_POST['phone'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+
+        if (!empty($password)) {
+            $this->userModel->updateUserPassword($userId, $password);
+        }
 
         $this->userModel->updateUserEmail($userId, $email);
-        $this->userModel->updateCustomerProfile($userId, $first, $last, '', '', '', '', '');
+        $this->userModel->updateCustomerProfile(
+            $userId,
+            $first,
+            $last,
+            $street_address,
+            $city,
+            $state,
+            $zip,
+            $phone
+        );
 
         header("Location: index.php?action=dashboard");
         exit;
