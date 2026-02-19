@@ -1,6 +1,3 @@
-<?php
-
-
 <h2>Edit Profile</h2>
 
 <form method="POST" action="index.php?action=updateProfile">
@@ -22,31 +19,31 @@
         value="<?= htmlspecialchars($user['last_name'] ?? '') ?>">
 
     <br><br>
-        <label>Street Address</label>
+    <label>Street Address</label>
     <input type="text" name="street_address"
         value="<?= htmlspecialchars($user['street_address'] ?? '') ?>">
 
     <br><br>
-        <label>City</label>
+    <label>City</label>
     <input type="text" name="city"
         value="<?= htmlspecialchars($user['city'] ?? '') ?>">
 
     <br><br>
-        <label>State</label>
+    <label>State</label>
     <input type="text" name="state"
         value="<?= htmlspecialchars($user['state'] ?? '') ?>">
 
     <br><br>
-        <label>Zip Code</label>
+    <label>Zip Code</label>
     <input type="text" name="zip"
         value="<?= htmlspecialchars($user['zip'] ?? '') ?>">
 
-        <label>Phone Number</label>
+    <label>Phone Number</label>
     <input type="text" name="phone"
         value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
 
     <br><br>
-        <label>Password</label>
+    <label>Password</label>
     <input type="password" name="password"
         value="<?= htmlspecialchars($user['password'] ?? '') ?>">
 
