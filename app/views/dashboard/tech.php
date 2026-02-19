@@ -1,7 +1,5 @@
 <?php
 
-
-
 function statusLabel(string $status): string
 {
     return match ($status) {
@@ -229,15 +227,15 @@ function statusLabel(string $status): string
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="index.php?action=updateComplaint" class="form">
+                    <form method="POST" action="index.php?action=techUpdateComplaint" class="form">
                         <input type="hidden" name="complaint_id" value="<?php echo htmlspecialchars((string)$selectedComplaint['complaint_id']); ?>">
 
+                        <!-- Add Update Note -->
                         <div class="field">
-                            <label class="field-label" for="technician_notes">Technician Notes / Analysis</label>
-                            <textarea class="textarea" id="technician_notes" name="technician_notes" rows="5"
-                                placeholder="Enter investigation steps, findings, and internal notes..."><?php
-                                                                                                            echo htmlspecialchars((string)($selectedComplaint['technician_notes'] ?? ''));
-                                                                                                            ?></textarea>
+                            <label class="field-label" for="update_note">Add Update Note</label>
+                            <textarea class="textarea" id="update_note" name="update_note" rows="5"
+                                placeholder="Tech/Customer Updates."></textarea>
+                            <p class="subtext">This note will be added to the complaint timeline and visible to the customer.</p>
                         </div>
 
                         <div class="grid-2">
@@ -260,21 +258,21 @@ function statusLabel(string $status): string
                             </div>
                         </div>
 
+                        <!-- Resolution Summary -->
                         <div class="field">
-                            <label class="field-label" for="resolution_notes">
-                                Resolution Notes <span class="required">*</span>
+                            <label class="field-label" for="resolution_summary">
+                                Resolution Summary <span class="required">*</span>
                             </label>
-                            <textarea class="textarea" id="resolution_notes" name="resolution_notes" rows="5"
-                                placeholder="Required if setting status to Resolved. What action resolved the complaint?"><?php
-                                                                                                                            echo htmlspecialchars((string)($selectedComplaint['resolution_notes'] ?? ''));
-                                                                                                                            ?></textarea>
-                            <p class="subtext">This field is required to resolve the complaint.</p>
+                            <textarea class="textarea" id="resolution_summary" name="resolution_summary" rows="5"
+                                placeholder="Required only if setting status to Resolved. What fixed it?"></textarea>
+                            <p class="subtext">Required only when status is Resolved.</p>
                         </div>
 
                         <div class="actions">
                             <button class="btn primary" type="submit">Save Changes</button>
                         </div>
                     </form>
+
                 </div>
             <?php endif; ?>
 

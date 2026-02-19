@@ -152,6 +152,10 @@ switch ($action) {
         (new AdminController($db))->openComplaints();
         break;
 
+    // TECHNICIAN ACTIONS
+    case 'techUpdateComplaint':
+        (new ComplaintController($db))->techUpdateComplaint();
+        break;
 
 
 
