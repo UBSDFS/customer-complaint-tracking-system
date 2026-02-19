@@ -265,6 +265,5 @@ ALTER TABLE `employee_profiles`
   ADD CONSTRAINT `fk_employee_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 COMMIT;
 
---admin@example.com/tech@example.com/customer@example.com the password: password! 
---bobjones@email.com password: testword!
+
 
