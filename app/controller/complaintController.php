@@ -515,4 +515,98 @@ class ComplaintController
         header("Location: index.php?action=dashboard");
         exit;
     }
+
+    private function requireTech()
+    {
+        $role = $_SESSION['role'] ?? null;
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+
+        if ($role !== 'tech' || $userId <= 0) {
+            http_response_code(403);
+            echo "Forbidden";
+            exit;
+        }
+    }
+
+    public function techUpdateComplaint()
+    {
+        $this->requireTech();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?action=techDashboard');
+            exit;
+        }
+
+        $complaintId = (int)($_POST['complaint_id'] ?? 0);
+        if ($complaintId <= 0) {
+            $_SESSION['flash_error'] = 'Invalid complaint.';
+            header('Location: index.php?action=techDashboard');
+            exit;
+        }
+
+        $status = trim($_POST['status'] ?? '');
+        $updateNote = trim($_POST['update_note'] ?? '');
+        $resolutionSummary = trim($_POST['resolution_summary'] ?? '');
+
+
+        $allowed = ['open', 'assigned', 'in_progress', 'resolved'];
+        if (!in_array($status, $allowed, true)) {
+            $_SESSION['flash_error'] = 'Invalid status value.';
+            header("Location: index.php?action=techDashboard&complaint_id={$complaintId}");
+            exit;
+        }
+
+        // If resolved, require resolution summary
+        if ($status === 'resolved' && $resolutionSummary === '') {
+            $_SESSION['flash_error'] = 'Resolution summary is required to resolve a complaint.';
+            header("Location: index.php?action=techDashboard&complaint_id={$complaintId}");
+            exit;
+        }
+
+        // Append update note if provided
+        if ($updateNote !== '') {
+            $appendRes = $this->complaintModel->appendDetails(
+                $complaintId,
+                $updateNote,
+                'TECH'
+            );
+
+            if (!$appendRes['ok']) {
+                $_SESSION['flash_error'] = $appendRes['error'] ?? 'Failed to append update note.';
+                header("Location: index.php?action=techDashboard&complaint_id={$complaintId}");
+                exit;
+            }
+        }
+
+        // If status is resolved, append resolution summary and set resolution date; else just update status
+        if ($status === 'resolved') {
+            $appendRes2 = $this->complaintModel->appendDetails(
+                $complaintId,
+                "RESOLUTION: " . $resolutionSummary,
+                'TECH'
+            );
+
+            if (!$appendRes2['ok']) {
+                $_SESSION['flash_error'] = $appendRes2['error'] ?? 'Failed to append resolution summary.';
+                header("Location: index.php?action=techDashboard&complaint_id={$complaintId}");
+                exit;
+            }
+
+            // Updates status, sets resolution date, and saves resolution summary in a separate field
+            $res = $this->complaintModel->resolveComplaint($complaintId);
+        } else {
+            // Just update status without changing resolution date or summary
+            $res = $this->complaintModel->updateStatus($complaintId, $status);
+        }
+
+        if (!$res['ok']) {
+            $_SESSION['flash_error'] = $res['error'] ?? 'Update failed.';
+            header("Location: index.php?action=techDashboard&complaint_id={$complaintId}");
+            exit;
+        }
+
+        $_SESSION['flash_success'] = 'Saved.';
+        header("Location: index.php?action=techDashboard&complaint_id={$complaintId}");
+        exit;
+    }
 }

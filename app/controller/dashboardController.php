@@ -25,7 +25,7 @@ class DashboardController
             return $this->tech();
         }
         if ($role === 'admin') {
-            header('Location: index.php?action=adminDashboard'); // <-- use your real action name
+            header('Location: index.php?action=adminDashboard'); // 
             exit;
         }
 

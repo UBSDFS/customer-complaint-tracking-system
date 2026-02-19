@@ -81,21 +81,16 @@ class ComplaintModel
 
     public function updateStatus(int $complaint_id, string $status): array
     {
-        if ($complaint_id <= 0) {
-            return ['ok' => false, 'error' => 'Invalid complaint_id.'];
-        }
+        if ($complaint_id <= 0) return ['ok' => false, 'error' => 'Invalid complaint_id.'];
 
         $allowed = ['open', 'assigned', 'in_progress', 'resolved'];
-
         if (!in_array($status, $allowed, true)) {
             return ['ok' => false, 'error' => 'Invalid status value.'];
         }
 
-
         if ($status === 'resolved') {
             return ['ok' => false, 'error' => "Use resolveComplaint() to mark a complaint as resolved."];
         }
-
 
         $sql = "UPDATE complaints
             SET status = ?,
@@ -103,22 +98,22 @@ class ComplaintModel
             WHERE complaint_id = ?";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) {
-            return ['ok' => false, 'error' => $this->db->error];
-        }
+        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
 
         $stmt->bind_param("si", $status, $complaint_id);
 
-        if (!$stmt->execute()) {
-            return ['ok' => false, 'error' => $stmt->error];
-        }
+        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
 
+        // If no rows changed, verify it exists 
         if ($stmt->affected_rows === 0) {
-            return ['ok' => false, 'error' => 'No complaint updated (invalid complaint_id or no change).'];
+            $check = $this->getComplaintById($complaint_id);
+            if (!$check['ok']) return ['ok' => false, 'error' => 'Complaint not found.'];
+            return ['ok' => true]; // exists, just no change
         }
 
         return ['ok' => true];
     }
+
 
 
     public function resolveComplaint(int $complaint_id, ?string $resolution_date = null): array

@@ -1,9 +1,3 @@
-<?php //Remove this debug code when done
-echo "<pre>";
-print_r($user);
-echo "</pre>";
-?>
-
 <h2>Edit Profile</h2>
 
 <form method="POST" action="index.php?action=updateProfile">
