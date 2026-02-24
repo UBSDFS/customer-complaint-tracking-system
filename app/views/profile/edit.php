@@ -1,65 +1,81 @@
 <div class="profile-edit">
     <h2>Edit Profile</h2>
 
-    <form method="POST" action="index.php?action=updateProfile">
+    <form method="POST" action="index.php?action=updateProfile" enctype="multipart/form-data">
 
-        <div class="field">
-            <label>Email</label>
-            <input type="text" name="email"
-                value="<?= htmlspecialchars($user['email'] ?? '') ?>">
-        </div>
+    <!-- Avatar upload -->
+    <div class="field">
+        <label>Profile Picture (optional)</label>
 
-        <div class="field">
-            <label>First Name</label>
-            <input type="text" name="first_name"
-                value="<?= htmlspecialchars($user['first_name'] ?? '') ?>">
-        </div>
+        <?php if (!empty($user['avatar_path'])): ?>
+            <div style="margin-bottom:10px;">
+                <img src="<?= htmlspecialchars($user['avatar_path']) ?>" alt="Profile picture"
+                    style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;">
+            </div>
+        <?php endif; ?>
 
-        <div class="field">
-            <label>Last Name</label>
-            <input type="text" name="last_name"
-                value="<?= htmlspecialchars($user['last_name'] ?? '') ?>">
-        </div>
+        <input type="file" name="avatar" accept="image/*">
+        <p class="subtext">JPG/PNG recommended.</p>
+    </div>
 
+
+    <div class="field">
+        <label>Email</label>
+        <input type="text" name="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>">
+    </div>
+
+    <div class="field">
+        <label>First Name</label>
+        <input type="text" name="first_name" value="<?= htmlspecialchars($user['first_name'] ?? '') ?>">
+    </div>
+
+    <div class="field">
+        <label>Last Name</label>
+        <input type="text" name="last_name" value="<?= htmlspecialchars($user['last_name'] ?? '') ?>">
+    </div>
+
+    <?php if (($user['role'] ?? '') === 'customer'): ?>
         <div class="field">
             <label>Street Address</label>
-            <input type="text" name="street_address"
-                value="<?= htmlspecialchars($user['street_address'] ?? '') ?>">
+            <input type="text" name="street_address" value="<?= htmlspecialchars($user['street_address'] ?? '') ?>">
         </div>
 
         <div class="field">
             <label>City</label>
-            <input type="text" name="city"
-                value="<?= htmlspecialchars($user['city'] ?? '') ?>">
+            <input type="text" name="city" value="<?= htmlspecialchars($user['city'] ?? '') ?>">
         </div>
 
         <div class="field">
             <label>State</label>
-            <input type="text" name="state"
-                value="<?= htmlspecialchars($user['state'] ?? '') ?>">
+            <input type="text" name="state" value="<?= htmlspecialchars($user['state'] ?? '') ?>">
         </div>
 
         <div class="field">
             <label>Zip Code</label>
-            <input type="text" name="zip"
-                value="<?= htmlspecialchars($user['zip'] ?? '') ?>">
+            <input type="text" name="zip" value="<?= htmlspecialchars($user['zip'] ?? '') ?>">
         </div>
 
         <div class="field">
             <label>Phone Number</label>
-            <input type="text" name="phone"
-                value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+            <input type="text" name="phone" value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
         </div>
 
+    <?php elseif (in_array(($user['role'] ?? ''), ['tech', 'admin'], true)): ?>
         <div class="field">
-            <label>Password</label>
-            <input type="password" name="password">
+            <label>Phone Ext</label>
+            <input type="text" name="phone_ext" value="<?= htmlspecialchars($user['phone_ext'] ?? '') ?>">
         </div>
+    <?php endif; ?>
 
-        <div class="actions">
-            <button type="submit">Save Changes</button>
-            <a class="cancel-link" href="index.php?action=dashboard">Cancel</a>
-        </div>
+    <div class="field">
+        <label>Password</label>
+        <input type="password" name="password">
+    </div>
+
+    <div class="actions">
+        <button type="submit">Save Changes</button>
+        <a class="cancel-link" href="index.php?action=dashboard">Cancel</a>
+    </div>
 
     </form>
 </div>

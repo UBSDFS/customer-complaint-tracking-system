@@ -30,16 +30,20 @@ function statusLabel(string $status): string
             <!-- Profile -->
             <section class="profile-card">
                 <div class="avatar">
-                    <?php
-                    $initials = '';
-                    if (!empty($tech['name'])) {
-                        $parts = preg_split('/\s+/', trim($tech['name']));
-                        $initials = strtoupper(substr($parts[0] ?? 'T', 0, 1) . substr($parts[1] ?? '', 0, 1));
-                    }
-                    echo htmlspecialchars($initials ?: 'T');
-                    ?>
+                    <?php if (!empty($tech['avatar_path'])): ?>
+                        <img src="<?= htmlspecialchars($tech['avatar_path']) ?>" alt="Profile picture"
+                            style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                    <?php else: ?>
+                        <?php
+                        $initials = '';
+                        if (!empty($tech['name'])) {
+                            $parts = preg_split('/\s+/', trim($tech['name']));
+                            $initials = strtoupper(substr($parts[0] ?? 'T', 0, 1) . substr($parts[1] ?? '', 0, 1));
+                        }
+                        echo htmlspecialchars($initials ?: 'T');
+                        ?>
+                    <?php endif; ?>
                 </div>
-
                 <div class="name"><?php echo htmlspecialchars($tech['name'] ?? ''); ?></div>
 
                 <div class="meta">
@@ -65,13 +69,15 @@ function statusLabel(string $status): string
 
                 <form method="GET" action="index.php" class="form">
                     <input type="hidden" name="action" value="techDashboard">
-                    <input type="hidden" name="complaint_id" value="<?php echo htmlspecialchars((string)($selectedId ?? 0)); ?>">
+                    <input type="hidden" name="complaint_id"
+                        value="<?php echo htmlspecialchars((string) ($selectedId ?? 0)); ?>">
 
                     <div class="field">
                         <label class="field-label" for="status">Filter</label>
                         <select class="select" id="status" name="status">
                             <option value="" <?php echo ($filterStatus ?? '') === '' ? 'selected' : ''; ?>>All</option>
-                            <option value="open" <?php echo ($filterStatus ?? '') === 'open' ? 'selected' : ''; ?>>Open</option>
+                            <option value="open" <?php echo ($filterStatus ?? '') === 'open' ? 'selected' : ''; ?>>Open
+                            </option>
                             <option value="assigned" <?php echo ($filterStatus ?? '') === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
                             <option value="in_progress" <?php echo ($filterStatus ?? '') === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
                             <option value="resolved" <?php echo ($filterStatus ?? '') === 'resolved' ? 'selected' : ''; ?>>Resolved</option>
@@ -95,8 +101,8 @@ function statusLabel(string $status): string
                                 continue;
                             }
 
-                            $cid = (int)($c['complaint_id'] ?? 0);
-                            $active = ($cid === (int)($selectedId ?? 0));
+                            $cid = (int) ($c['complaint_id'] ?? 0);
+                            $active = ($cid === (int) ($selectedId ?? 0));
 
                             $badgeStatusClass = match ($c['status'] ?? 'open') {
                                 'open' => 'open',
@@ -106,15 +112,15 @@ function statusLabel(string $status): string
                                 default => 'open',
                             };
 
-                            $details = trim((string)($c['details'] ?? ''));
+                            $details = trim((string) ($c['details'] ?? ''));
                             $title = $details !== '' ? $details : 'Complaint';
                             $titleShort = (mb_strlen($title) > 44) ? (mb_substr($title, 0, 44) . '…') : $title;
                             ?>
                             <div class="complaint-card <?php echo $active ? 'active' : ''; ?>">
                                 <div class="card-top">
-                                    <span class="product">#<?php echo htmlspecialchars((string)$cid); ?></span>
+                                    <span class="product">#<?php echo htmlspecialchars((string) $cid); ?></span>
                                     <span class="badge status <?php echo htmlspecialchars($badgeStatusClass); ?>">
-                                        <?php echo htmlspecialchars(statusLabel((string)($c['status'] ?? 'open'))); ?>
+                                        <?php echo htmlspecialchars(statusLabel((string) ($c['status'] ?? 'open'))); ?>
                                     </span>
                                 </div>
 
@@ -124,7 +130,7 @@ function statusLabel(string $status): string
                                     <span class="subtext"></span>
                                     <div class="actions">
                                         <a class="btn secondary"
-                                            href="index.php?action=techDashboard&complaint_id=<?php echo urlencode((string)$cid); ?>&status=<?php echo urlencode((string)($filterStatus ?? '')); ?>">
+                                            href="index.php?action=techDashboard&complaint_id=<?php echo urlencode((string) $cid); ?>&status=<?php echo urlencode((string) ($filterStatus ?? '')); ?>">
                                             Open
                                         </a>
                                     </div>
@@ -169,20 +175,21 @@ function statusLabel(string $status): string
                 <div class="summary">
                     <div class="summary-item">
                         <span class="summary-label">Ticket</span>
-                        <span class="summary-value">#<?php echo htmlspecialchars((string)$selectedComplaint['complaint_id']); ?></span>
+                        <span
+                            class="summary-value">#<?php echo htmlspecialchars((string) $selectedComplaint['complaint_id']); ?></span>
                     </div>
 
                     <div class="summary-item">
                         <span class="summary-label">Status</span>
                         <span class="badge status <?php echo htmlspecialchars($selectedBadgeStatusClass); ?>">
-                            <?php echo htmlspecialchars(statusLabel((string)($selectedComplaint['status'] ?? 'open'))); ?>
+                            <?php echo htmlspecialchars(statusLabel((string) ($selectedComplaint['status'] ?? 'open'))); ?>
                         </span>
                     </div>
 
                     <div class="summary-item">
                         <span class="summary-label">Resolution Date</span>
                         <span class="summary-value">
-                            <?php echo $resolutionDate ? htmlspecialchars((string)$resolutionDate) : '—'; ?>
+                            <?php echo $resolutionDate ? htmlspecialchars((string) $resolutionDate) : '—'; ?>
                         </span>
                     </div>
                 </div>
@@ -191,20 +198,24 @@ function statusLabel(string $status): string
                 <div class="complaint-card">
                     <div class="card-top">
                         <span class="badge type">Customer Input</span>
-                        <span class="subtext">Complaint ID: <?php echo htmlspecialchars((string)$selectedComplaint['complaint_id']); ?></span>
+                        <span class="subtext">Complaint ID:
+                            <?php echo htmlspecialchars((string) $selectedComplaint['complaint_id']); ?></span>
                     </div>
 
                     <div class="product">
-                        Complaint Type ID: <?php echo htmlspecialchars((string)($selectedComplaint['complaint_type_id'] ?? '')); ?>
+                        Complaint Type ID:
+                        <?php echo htmlspecialchars((string) ($selectedComplaint['complaint_type_id'] ?? '')); ?>
                     </div>
 
                     <div class="details readonly">
-                        <?php echo htmlspecialchars((string)($selectedComplaint['details'] ?? '')); ?>
+                        <?php echo htmlspecialchars((string) ($selectedComplaint['details'] ?? '')); ?>
                     </div>
 
                     <?php if (!empty($selectedComplaint['image_path'])): ?>
                         <div class="details">
-                            <a class="btn secondary" href="<?php echo htmlspecialchars((string)$selectedComplaint['image_path']); ?>" target="_blank" rel="noopener">
+                            <a class="btn secondary"
+                                href="<?php echo htmlspecialchars((string) $selectedComplaint['image_path']); ?>"
+                                target="_blank" rel="noopener">
                                 View Uploaded Image
                             </a>
                         </div>
@@ -228,32 +239,37 @@ function statusLabel(string $status): string
                     <?php endif; ?>
 
                     <form method="POST" action="index.php?action=techUpdateComplaint" class="form">
-                        <input type="hidden" name="complaint_id" value="<?php echo htmlspecialchars((string)$selectedComplaint['complaint_id']); ?>">
+                        <input type="hidden" name="complaint_id"
+                            value="<?php echo htmlspecialchars((string) $selectedComplaint['complaint_id']); ?>">
 
                         <!-- Add Update Note -->
                         <div class="field">
                             <label class="field-label" for="update_note">Add Update Note</label>
                             <textarea class="textarea" id="update_note" name="update_note" rows="5"
                                 placeholder="Tech/Customer Updates."></textarea>
-                            <p class="subtext">This note will be added to the complaint timeline and visible to the customer.</p>
+                            <p class="subtext">This note will be added to the complaint timeline and visible to the
+                                customer.</p>
                         </div>
 
                         <div class="grid-2">
                             <div class="field">
                                 <label class="field-label" for="status_update">Status</label>
                                 <select class="select" id="status_update" name="status">
-                                    <?php $currentStatus = (string)($selectedComplaint['status'] ?? 'open'); ?>
-                                    <option value="open" <?php echo $currentStatus === 'open' ? 'selected' : ''; ?>>Open</option>
-                                    <option value="assigned" <?php echo $currentStatus === 'assigned' ? 'selected' : ''; ?>>Assigned</option>
+                                    <?php $currentStatus = (string) ($selectedComplaint['status'] ?? 'open'); ?>
+                                    <option value="open" <?php echo $currentStatus === 'open' ? 'selected' : ''; ?>>Open
+                                    </option>
+                                    <option value="assigned" <?php echo $currentStatus === 'assigned' ? 'selected' : ''; ?>>
+                                        Assigned</option>
                                     <option value="in_progress" <?php echo $currentStatus === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                                    <option value="resolved" <?php echo $currentStatus === 'resolved' ? 'selected' : ''; ?>>Resolved</option>
+                                    <option value="resolved" <?php echo $currentStatus === 'resolved' ? 'selected' : ''; ?>>
+                                        Resolved</option>
                                 </select>
                             </div>
 
                             <div class="field">
                                 <label class="field-label" for="resolved_at">Resolution Date</label>
                                 <input class="input" id="resolved_at" type="text"
-                                    value="<?php echo $resolutionDate ? htmlspecialchars((string)$resolutionDate) : ''; ?>"
+                                    value="<?php echo $resolutionDate ? htmlspecialchars((string) $resolutionDate) : ''; ?>"
                                     placeholder="Auto-set when resolved" disabled>
                             </div>
                         </div>

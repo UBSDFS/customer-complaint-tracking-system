@@ -209,7 +209,8 @@ ALTER TABLE `products`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD COLUMN avatar_path VARCHAR(255) NULL DEFAULT NULL;
 
 --
 -- AUTO_INCREMENT for dumped tables

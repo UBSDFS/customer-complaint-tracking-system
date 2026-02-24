@@ -35,22 +35,25 @@ class ComplaintController
             exit;
         }
 
-        $customer_id = (int)($_SESSION['user_id'] ?? 0);
+        $customer_id = (int) ($_SESSION['user_id'] ?? 0);
         if ($customer_id <= 0) {
             header("Location: index.php?action=showLogin");
             exit;
         }
 
 
-        $complaint_type_id = (int)($_POST['complaintTypeId'] ?? 0);
+        $complaint_type_id = (int) ($_POST['complaintTypeId'] ?? 0);
         $details = trim($_POST['details'] ?? '');
-        $product_id = (int)($_POST["productId"] ?? 0);
+        $product_id = (int) ($_POST["productId"] ?? 0);
 
 
         $errors = [];
-        if ($complaint_type_id <= 0) $errors[] = "Please select a complaint type.";
-        if ($details === '') $errors[] = "Description is required.";
-        if ($product_id <= 0) $errors[] = 'Please select a product type.';
+        if ($complaint_type_id <= 0)
+            $errors[] = "Please select a complaint type.";
+        if ($details === '')
+            $errors[] = "Description is required.";
+        if ($product_id <= 0)
+            $errors[] = 'Please select a product type.';
 
 
 
@@ -74,7 +77,8 @@ class ComplaintController
 
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                     $safeExt = strtolower(preg_replace('/[^a-z0-9]/', '', $ext));
-                    if ($safeExt === '') $safeExt = 'jpg';
+                    if ($safeExt === '')
+                        $safeExt = 'jpg';
 
                     $filename = 'c_' . $customer_id . '_' . time() . '.' . $safeExt;
                     $dest = $uploadDir . '/' . $filename;
@@ -131,7 +135,7 @@ class ComplaintController
     // GET: complaint details (customer/tech/admin)
     public function show()
     {
-        $complaintId = isset($_GET['complaint_id']) ? (int)$_GET['complaint_id'] : 0;
+        $complaintId = isset($_GET['complaint_id']) ? (int) $_GET['complaint_id'] : 0;
         if ($complaintId <= 0) {
             http_response_code(400);
             echo "Invalid complaint id";
@@ -147,20 +151,20 @@ class ComplaintController
         $complaint = $result['complaint'];
 
         $role = $_SESSION['role'] ?? null;
-        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
 
         if (!$role || $userId <= 0) {
             header("Location: index.php?action=showLogin");
             exit;
         }
 
-        if ($role === 'customer' && (int)$complaint['customer_id'] !== $userId) {
+        if ($role === 'customer' && (int) $complaint['customer_id'] !== $userId) {
             http_response_code(403);
             echo "Forbidden";
             return;
         }
 
-        if ($role === 'technician' && (int)$complaint['tech_id'] !== $userId) {
+        if ($role === 'technician' && (int) $complaint['tech_id'] !== $userId) {
             http_response_code(403);
             echo "Forbidden";
             return;
@@ -179,7 +183,7 @@ class ComplaintController
             return;
         }
 
-        $complaintId = isset($_GET['complaint_id']) ? (int)$_GET['complaint_id'] : 0;
+        $complaintId = isset($_GET['complaint_id']) ? (int) $_GET['complaint_id'] : 0;
         if ($complaintId <= 0) {
             http_response_code(400);
             echo "Invalid id";
@@ -195,10 +199,10 @@ class ComplaintController
 
         $complaint = $result['complaint'];
 
-        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
 
 
-        if ($role === 'technician' && (int)$complaint['tech_id'] !== $userId) {
+        if ($role === 'technician' && (int) $complaint['tech_id'] !== $userId) {
             http_response_code(403);
             echo "Forbidden";
             return;
@@ -224,7 +228,7 @@ class ComplaintController
             return;
         }
 
-        $complaintId = (int)($_POST['complaint_id'] ?? 0);
+        $complaintId = (int) ($_POST['complaint_id'] ?? 0);
         $technicianNotes = trim($_POST['technician_notes'] ?? '');
         $status = trim($_POST['status'] ?? 'open');
         $resolutionNotes = trim($_POST['resolution_notes'] ?? '');
@@ -268,7 +272,7 @@ class ComplaintController
     public function view()
     {
         $role = $_SESSION['role'] ?? null;
-        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
 
         if (!$role || $userId <= 0) {
             header("Location: index.php?action=showLogin");
@@ -276,7 +280,7 @@ class ComplaintController
         }
 
 
-        $complaintId = (int)($_GET['complaint_id'] ?? 0);
+        $complaintId = (int) ($_GET['complaint_id'] ?? 0);
         if ($complaintId <= 0) {
             http_response_code(400);
             echo "Invalid id";
@@ -293,13 +297,13 @@ class ComplaintController
         $complaint = $result['complaint'];
 
         // Authorization
-        if ($role === 'customer' && (int)($complaint['customer_id'] ?? 0) !== $userId) {
+        if ($role === 'customer' && (int) ($complaint['customer_id'] ?? 0) !== $userId) {
             http_response_code(403);
             echo "Forbidden";
             return;
         }
 
-        if ($role === 'technician' && (int)($complaint['tech_id'] ?? 0) !== $userId) {
+        if ($role === 'technician' && (int) ($complaint['tech_id'] ?? 0) !== $userId) {
             http_response_code(403);
             echo "Forbidden";
             return;
@@ -317,7 +321,7 @@ class ComplaintController
     }
     public function editCustomer()
     {
-        $customer_id = (int)($_SESSION['user_id'] ?? 0);
+        $customer_id = (int) ($_SESSION['user_id'] ?? 0);
         $role = $_SESSION['role'] ?? '';
 
         if ($role !== 'customer' || $customer_id <= 0) {
@@ -325,7 +329,7 @@ class ComplaintController
             exit;
         }
 
-        $complaint_id = (int)($_GET['id'] ?? 0);
+        $complaint_id = (int) ($_GET['id'] ?? 0);
 
         if ($complaint_id <= 0) {
             http_response_code(400);
@@ -344,7 +348,7 @@ class ComplaintController
         $complaint = $result['complaint'];
 
         //check who owns the complaint - only owner can edit
-        if ((int)($complaint['customer_id'] ?? 0) !== $customer_id) {
+        if ((int) ($complaint['customer_id'] ?? 0) !== $customer_id) {
             http_response_code(403);
             echo "Forbidden";
             return;
@@ -367,159 +371,146 @@ class ComplaintController
 
         //pre-fill form with existing complaint data
         $old = [
-            'complaintTypeId' => (int)($complaint['complaint_type_id'] ?? 0),
-            'details'         => (string)($complaint['details'] ?? ''),
-            'productId'       => (int)($complaint['product_id'] ?? 0),
-            'imagePath'       => (string)($complaint['image_path'] ?? ''),
+            'complaint_type_id' => (int) ($complaint['complaint_type_id'] ?? 0),
+            'product_id' => (int) ($complaint['product_id'] ?? 0),
+            'details' => (string) ($complaint['details'] ?? ''),
+            'image_path' => (string) ($complaint['image_path'] ?? ''),
         ];
 
         require __DIR__ . '/../views/complaintForm/editComplaintForm.php';
     }
-    public function updateCustomer()
-    {
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: index.php?action=dashboard");
-            exit;
-        }
-
-        $customer_id = (int)($_SESSION['user_id'] ?? 0);
-        $role = $_SESSION['role'] ?? '';
-
-        if ($role !== 'customer' || $customer_id <= 0) {
-            header("Location: index.php?action=showLogin");
-            exit;
-        }
-
-        $complaint_id = (int)($_POST['complaint_id'] ?? 0);
-        if ($complaint_id <= 0) {
-            http_response_code(400);
-            echo "Invalid id";
-            return;
-        }
-
-        // fetch existing complaint (ownership + old image path)
-        $existingRes = $this->complaintModel->getComplaintById($complaint_id);
-        if (!$existingRes['ok']) {
-            http_response_code(404);
-            echo $existingRes['error'];
-            return;
-        }
-
-        $complaint = $existingRes['complaint'];
-
-        if ((int)($complaint['customer_id'] ?? 0) !== $customer_id) {
-            http_response_code(403);
-            echo "Forbidden";
-            return;
-        }
-
-        if (($complaint['status'] ?? '') === 'resolved') {
-            http_response_code(403);
-            echo "Cannot edit a resolved complaint.";
-            return;
-        }
-
-        $complaint_type_id = (int)($_POST['complaintTypeId'] ?? 0);
-        $details = trim($_POST['details'] ?? '');
-        $product_id = (int)($_POST["productId"] ?? 0);
-
-        $errors = [];
-        if ($complaint_type_id <= 0) $errors[] = "Please select a complaint type.";
-        if ($details === '') $errors[] = "Description is required.";
-        if ($product_id <= 0) $errors[] = 'Please select a product type.';
-
-        // default: keep existing image
-        $image_path = (string)($complaint['image_path'] ?? '');
-
-        // replace only if new file uploaded
-        if (!empty($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
-
-            if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-                $errors[] = "Image upload failed.";
-            } else {
-                $tmp = $_FILES['image']['tmp_name'];
-                $info = @getimagesize($tmp);
-
-                if ($info === false) {
-                    $errors[] = "Uploaded file is not a valid image.";
-                } else {
-                    $uploadDir = __DIR__ . '/../../public/uploads/complaints';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0777, true);
-                    }
-
-                    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                    $safeExt = strtolower(preg_replace('/[^a-z0-9]/', '', $ext));
-                    if ($safeExt === '') $safeExt = 'jpg';
-
-                    $filename = 'c_' . $customer_id . '_' . time() . '.' . $safeExt;
-                    $dest = $uploadDir . '/' . $filename;
-
-                    if (!move_uploaded_file($tmp, $dest)) {
-                        $errors[] = "Could not save uploaded image.";
-                    } else {
-                        $image_path = '/customer-complaint-tracking-system/public/uploads/complaints/' . $filename;
-                    }
-                }
-            }
-        }
-
-        // re-render edit form on errors (same pattern as store())
-        if (!empty($errors)) {
-            $typesResult = $this->complaintModel->getComplaintTypes();
-            $types = $typesResult['ok'] ? $typesResult['types'] : [];
-
-            $productsResult = $this->complaintModel->getProductTypes();
-            $products = $productsResult['ok'] ? $productsResult['products'] : [];
-
-            $old = [
-                'complaintTypeId' => $complaint_type_id,
-                'details' => $details,
-                'productId' => $product_id,
-                'imagePath' => $image_path,
-            ];
-
-            require __DIR__ . '/../views/complaintForm/editComplaintForm.php';
-            return;
-        }
-
-        // call model update
-        $updateRes = $this->complaintModel->updateCustomerComplaint(
-            $complaint_id,
-            $complaint_type_id,
-            $details,
-            $product_id,
-            $image_path
-        );
-
-        if (!$updateRes['ok']) {
-            $typesResult = $this->complaintModel->getComplaintTypes();
-            $types = $typesResult['ok'] ? $typesResult['types'] : [];
-
-            $productsResult = $this->complaintModel->getProductTypes();
-            $products = $productsResult['ok'] ? $productsResult['products'] : [];
-
-            $errors[] = $updateRes['error'] ?? 'Update failed.';
-            $old = [
-                'complaintTypeId' => $complaint_type_id,
-                'details' => $details,
-                'productId' => $product_id,
-                'imagePath' => $image_path,
-            ];
-
-            require __DIR__ . '/../views/complaintForm/editComplaintForm.php';
-            return;
-        }
-
+public function updateCustomer()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         header("Location: index.php?action=dashboard");
         exit;
     }
 
+    $customer_id = (int)($_SESSION['user_id'] ?? 0);
+    $role = $_SESSION['role'] ?? '';
+
+    if ($role !== 'customer' || $customer_id <= 0) {
+        header("Location: index.php?action=showLogin");
+        exit;
+    }
+
+    $complaint_id = (int)($_POST['complaint_id'] ?? 0);
+    if ($complaint_id <= 0) {
+        http_response_code(400);
+        echo "Invalid id";
+        return;
+    }
+
+    // Fetch existing complaint (ownership + status + old image path + existing details)
+    $existingRes = $this->complaintModel->getComplaintById($complaint_id);
+    if (!$existingRes['ok']) {
+        http_response_code(404);
+        echo $existingRes['error'];
+        return;
+    }
+
+    $complaint = $existingRes['complaint'];
+
+    if ((int)($complaint['customer_id'] ?? 0) !== $customer_id) {
+        http_response_code(403);
+        echo "Forbidden";
+        return;
+    }
+
+    if (($complaint['status'] ?? '') === 'resolved') {
+        http_response_code(403);
+        echo "Cannot edit a resolved complaint.";
+        return;
+    }
+
+    // Append-only input
+    $new_note = trim($_POST['new_note'] ?? '');
+
+    $errors = [];
+    if ($new_note === '') {
+        $errors[] = "Update note is required.";
+    }
+
+    // Default: keep existing image
+    $image_path = (string)($complaint['image_path'] ?? '');
+
+    // Replace image only if new file uploaded
+    if (!empty($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+
+        if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            $errors[] = "Image upload failed.";
+        } else {
+            $tmp = $_FILES['image']['tmp_name'];
+            $info = @getimagesize($tmp);
+
+            if ($info === false) {
+                $errors[] = "Uploaded file is not a valid image.";
+            } else {
+                $uploadDir = __DIR__ . '/../../public/uploads/complaints';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $safeExt = strtolower(preg_replace('/[^a-z0-9]/', '', $ext));
+                if ($safeExt === '') $safeExt = 'jpg';
+
+                $filename = 'c_' . $customer_id . '_' . time() . '.' . $safeExt;
+                $dest = $uploadDir . '/' . $filename;
+
+                if (!move_uploaded_file($tmp, $dest)) {
+                    $errors[] = "Could not save uploaded image.";
+                } else {
+                    $image_path = '/customer-complaint-tracking-system/public/uploads/complaints/' . $filename;
+                }
+            }
+        }
+    }
+
+    // If errors, re-render the form with existing complaint data
+    if (!empty($errors)) {
+        $typesResult = $this->complaintModel->getComplaintTypes();
+        $types = $typesResult['ok'] ? $typesResult['types'] : [];
+
+        $productsResult = $this->complaintModel->getProductTypes();
+        $products = $productsResult['ok'] ? $productsResult['products'] : [];
+
+        $old = [
+            'complaint_type_id' => (int)($complaint['complaint_type_id'] ?? 0),
+            'product_id'        => (int)($complaint['product_id'] ?? 0),
+            'details'           => (string)($complaint['details'] ?? ''),
+            'image_path'        => (string)$image_path, // show updated preview if upload succeeded
+        ];
+
+        require __DIR__ . '/../views/complaintForm/editComplaintForm.php';
+        return;
+    }
+
+    // 1) Append the note to details
+    $appendRes = $this->complaintModel->appendDetails($complaint_id, $new_note, 'CUSTOMER');
+    if (!$appendRes['ok']) {
+        http_response_code(400);
+        echo $appendRes['error'] ?? 'Failed to append update note.';
+        return;
+    }
+
+    // 2) If image changed, update ONLY image_path
+    if ($image_path !== (string)($complaint['image_path'] ?? '')) {
+        $imgRes = $this->complaintModel->updateComplaintImagePath($complaint_id, $image_path);
+        if (!$imgRes['ok']) {
+            http_response_code(500);
+            echo $imgRes['error'] ?? 'Failed to update image.';
+            return;
+        }
+    }
+
+    header("Location: index.php?action=dashboard");
+    exit;
+}
     private function requireTech()
     {
         $role = $_SESSION['role'] ?? null;
-        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
 
         if ($role !== 'tech' || $userId <= 0) {
             http_response_code(403);
@@ -537,7 +528,7 @@ class ComplaintController
             exit;
         }
 
-        $complaintId = (int)($_POST['complaint_id'] ?? 0);
+        $complaintId = (int) ($_POST['complaint_id'] ?? 0);
         if ($complaintId <= 0) {
             $_SESSION['flash_error'] = 'Invalid complaint.';
             header('Location: index.php?action=techDashboard');

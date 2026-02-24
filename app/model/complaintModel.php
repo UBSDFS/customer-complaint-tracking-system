@@ -32,12 +32,14 @@ class ComplaintModel
             VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+        if (!$stmt)
+            return ['ok' => false, 'error' => $this->db->error];
 
 
         $stmt->bind_param("iiisss", $customer_id, $product_id, $complaint_type_id, $details, $image_path, $status);
 
-        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+        if (!$stmt->execute())
+            return ['ok' => false, 'error' => $stmt->error];
 
         return ['ok' => true, 'complaint_id' => $stmt->insert_id];
     }
@@ -81,7 +83,8 @@ class ComplaintModel
 
     public function updateStatus(int $complaint_id, string $status): array
     {
-        if ($complaint_id <= 0) return ['ok' => false, 'error' => 'Invalid complaint_id.'];
+        if ($complaint_id <= 0)
+            return ['ok' => false, 'error' => 'Invalid complaint_id.'];
 
         $allowed = ['open', 'assigned', 'in_progress', 'resolved'];
         if (!in_array($status, $allowed, true)) {
@@ -98,16 +101,19 @@ class ComplaintModel
             WHERE complaint_id = ?";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+        if (!$stmt)
+            return ['ok' => false, 'error' => $this->db->error];
 
         $stmt->bind_param("si", $status, $complaint_id);
 
-        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+        if (!$stmt->execute())
+            return ['ok' => false, 'error' => $stmt->error];
 
         // If no rows changed, verify it exists 
         if ($stmt->affected_rows === 0) {
             $check = $this->getComplaintById($complaint_id);
-            if (!$check['ok']) return ['ok' => false, 'error' => 'Complaint not found.'];
+            if (!$check['ok'])
+                return ['ok' => false, 'error' => 'Complaint not found.'];
             return ['ok' => true]; // exists, just no change
         }
 
@@ -206,7 +212,7 @@ class ComplaintModel
             }
 
             $row = $result->fetch_assoc();
-            $existing = (string)($row['details'] ?? '');
+            $existing = (string) ($row['details'] ?? '');
 
 
             $timestamp = date('Y-m-d H:i');
@@ -419,9 +425,11 @@ class ComplaintModel
             ORDER BY c.complaint_id DESC";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+        if (!$stmt)
+            return ['ok' => false, 'error' => $this->db->error];
 
-        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+        if (!$stmt->execute())
+            return ['ok' => false, 'error' => $stmt->error];
 
         $result = $stmt->get_result();
         $rows = [];
@@ -458,9 +466,11 @@ class ComplaintModel
             ORDER BY c.complaint_id DESC";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+        if (!$stmt)
+            return ['ok' => false, 'error' => $this->db->error];
 
-        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+        if (!$stmt->execute())
+            return ['ok' => false, 'error' => $stmt->error];
 
         $result = $stmt->get_result();
         $rows = [];
@@ -478,9 +488,11 @@ class ComplaintModel
                 ORDER BY product_id";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+        if (!$stmt)
+            return ['ok' => false, 'error' => $this->db->error];
 
-        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+        if (!$stmt->execute())
+            return ['ok' => false, 'error' => $stmt->error];
 
         $result = $stmt->get_result();
         $products = [];
@@ -498,9 +510,11 @@ class ComplaintModel
                 ORDER BY complaint_type_id";
 
         $stmt = $this->db->prepare($sql);
-        if (!$stmt) return ['ok' => false, 'error' => $this->db->error];
+        if (!$stmt)
+            return ['ok' => false, 'error' => $this->db->error];
 
-        if (!$stmt->execute()) return ['ok' => false, 'error' => $stmt->error];
+        if (!$stmt->execute())
+            return ['ok' => false, 'error' => $stmt->error];
 
         $result = $stmt->get_result();
         $types = [];
@@ -526,6 +540,23 @@ class ComplaintModel
         if (!$stmt->execute()) {
             return ['ok' => false, 'error' => $stmt->error];
         }
+
+        return ['ok' => true];
+    }
+
+    public function updateComplaintImagePath(int $complaint_id, string $image_path): array
+    {
+        if ($complaint_id <= 0)
+            return ['ok' => false, 'error' => 'Invalid complaint id.'];
+
+        $sql = "UPDATE complaints SET image_path = ? WHERE complaint_id = ?";
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt)
+            return ['ok' => false, 'error' => $this->db->error];
+
+        $stmt->bind_param("si", $image_path, $complaint_id);
+        if (!$stmt->execute())
+            return ['ok' => false, 'error' => $stmt->error];
 
         return ['ok' => true];
     }

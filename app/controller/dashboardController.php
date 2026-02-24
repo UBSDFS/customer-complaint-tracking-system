@@ -1,14 +1,18 @@
 <?php
 
 require_once __DIR__ . '/../model/complaintModel.php';
+require_once __DIR__ . '/../model/userModel.php';
+
 
 class DashboardController
 {
     private ComplaintModel $complaintModel;
+    private UserModel $userModel;
 
     public function __construct($db)
     {
         $this->complaintModel = new ComplaintModel($db);
+        $this->userModel = new UserModel($db);
     }
 
     public function show()
@@ -29,13 +33,16 @@ class DashboardController
             exit;
         }
 
-        $userId = (int)$_SESSION['user_id'];
+        $userId = (int) $_SESSION['user_id'];
+
+        $dbUser = $this->userModel->getUserById($userId);
 
         $user = [
-            'firstName'   => $_SESSION['firstName'] ?? '',
-            'lastName'    => $_SESSION['lastName'] ?? '',
-            'email'       => $_SESSION['email'] ?? '',
-            'phoneNumber' => $_SESSION['phoneNumber'] ?? ''
+            'firstName' => $_SESSION['firstName'] ?? ($dbUser['first_name'] ?? ''),
+            'lastName' => $_SESSION['lastName'] ?? ($dbUser['last_name'] ?? ''),
+            'email' => $_SESSION['email'] ?? ($dbUser['email'] ?? ''),
+            'phoneNumber' => $_SESSION['phoneNumber'] ?? ($dbUser['phone'] ?? ''),
+            'avatar_path' => $dbUser['avatar_path'] ?? null,
         ];
         $complaints = [];
         $summary = [
@@ -90,7 +97,7 @@ class DashboardController
         }
 
         $role = $_SESSION['role'] ?? null;
-        $techId = (int)($_SESSION['user_id'] ?? 0);
+        $techId = (int) ($_SESSION['user_id'] ?? 0);
 
         if ($role !== 'tech') {
             http_response_code(403);
@@ -98,19 +105,22 @@ class DashboardController
             return;
         }
 
+        $dbUser = $this->userModel->getUserById($techId);
+
         $tech = [
-            'name'  => trim(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')),
-            'email' => $_SESSION['email'] ?? '',
-            'role'  => 'tech',
+            'name' => trim(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')),
+            'email' => $_SESSION['email'] ?? ($dbUser['email'] ?? ''),
+            'role' => 'tech',
+            'avatar_path' => $dbUser['avatar_path'] ?? null,
         ];
 
 
         $complaints = $this->complaintModel->getComplaintsAssignedToTech($techId);
 
         // choose selected complaint
-        $selectedId = isset($_GET['complaint_id']) ? (int)$_GET['complaint_id'] : 0;
+        $selectedId = isset($_GET['complaint_id']) ? (int) $_GET['complaint_id'] : 0;
         if ($selectedId <= 0 && !empty($complaints)) {
-            $selectedId = (int)$complaints[0]['complaint_id'];
+            $selectedId = (int) $complaints[0]['complaint_id'];
         }
 
         $selectedComplaint = null;
@@ -118,7 +128,7 @@ class DashboardController
             $r = $this->complaintModel->getComplaintById($selectedId);
             if ($r['ok']) {
 
-                if ((int)$r['complaint']['tech_id'] === $techId) {
+                if ((int) $r['complaint']['tech_id'] === $techId) {
                     $selectedComplaint = $r['complaint'];
                 }
             }

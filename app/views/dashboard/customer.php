@@ -12,7 +12,14 @@
 <body>
     <main class="dash">
         <aside class="profile-card">
-            <div class="avatar" aria-hidden="true">PFP</div>
+            <div class="avatar" aria-hidden="true">
+                <?php if (!empty($user['avatar_path'])): ?>
+                    <img src="<?= htmlspecialchars($user['avatar_path']) ?>" alt="Profile picture"
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                <?php else: ?>
+                    PFP
+                <?php endif; ?>
+            </div>
 
             <h2 class="name">
                 <?= htmlspecialchars(($user['firstName'] ?? '') . ' ' . ($user['lastName'] ?? '')) ?>
@@ -56,15 +63,15 @@
             <div class="summary">
                 <div class="summary-item">
                     <span class="summary-label">Open</span>
-                    <span class="summary-value"><?= (int)($summary['open'] ?? 0) ?></span>
+                    <span class="summary-value"><?= (int) ($summary['open'] ?? 0) ?></span>
                 </div>
                 <div class="summary-item">
                     <span class="summary-label">Resolved</span>
-                    <span class="summary-value"><?= (int)($summary['resolved'] ?? 0) ?></span>
+                    <span class="summary-value"><?= (int) ($summary['resolved'] ?? 0) ?></span>
                 </div>
                 <div class="summary-item">
                     <span class="summary-label">Total</span>
-                    <span class="summary-value"><?= (int)($summary['total'] ?? 0) ?></span>
+                    <span class="summary-value"><?= (int) ($summary['total'] ?? 0) ?></span>
                 </div>
             </div>
 
@@ -82,7 +89,7 @@
                         $typeName = $c['complaint_type_name'] ?? ($c['type'] ?? 'Other');
 
 
-                        $status = strtolower((string)($c['status'] ?? 'open'));
+                        $status = strtolower((string) ($c['status'] ?? 'open'));
                         $details = $c['details'] ?? '';
                         $id = $c['complaint_id'] ?? 0;
 
@@ -116,7 +123,8 @@
                                 </div>
 
                                 <div class="actions">
-                                    <a class="link" href="index.php?action=viewComplaint&complaint_id=<?= urlencode((string)$id) ?>">
+                                    <a class="link"
+                                        href="index.php?action=viewComplaint&complaint_id=<?= urlencode((string) $id) ?>">
                                         View Details
                                     </a>
                                 </div>
