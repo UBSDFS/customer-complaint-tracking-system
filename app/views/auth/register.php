@@ -61,8 +61,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         empty($city_error) && empty($state_error) && empty($zipCode_error) && 
         empty($phoneNumber_error) && empty($email_error) && empty($password_error) && 
         empty($passwordConfirmation_error)) {
-        // - hash password
-        // - insert into database
         header("Location: index.php");
         exit;
     }

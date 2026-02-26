@@ -1,4 +1,6 @@
 <?php
+// Front Controller for the Complaint Management System
+// This file initializes the application, handles routing, and dispatches requests to the appropriate controllers.
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }

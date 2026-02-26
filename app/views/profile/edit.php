@@ -1,3 +1,4 @@
+<!-- View for editing user profile information -->
 <div class="profile-edit">
     <h2>Edit Profile</h2>
 

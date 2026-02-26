@@ -1,6 +1,6 @@
 Project Name: Customer Complaint Tracking System
 
-Project Description
+Project Description:
 Customer Complaint Tracking System is a role-based, responsive web application built with PHP and MySQL that enables customers to submit product complaints (optionally with an image), technicians to manage and resolve assigned issues, and administrators to oversee users and complaints across the system.
 
 The application follows the MVC (Model-View-Controller) architectural pattern to keep business logic, database operations, and UI concerns clearly separated.
