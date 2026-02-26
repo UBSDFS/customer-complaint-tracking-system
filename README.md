@@ -80,8 +80,23 @@ Project Tasks
 2. Import the provided SQL schema/seed into MySQL (phpMyAdmin).
 3. Update database configuration values (host, dbname, username, password).
 4. Launch:
-   - `http://localhost/<project-folder>/public/`
-
+   - `https://localhost/<project-folder>/public/`
+5. Login with an existing user:
+  - Admin
+      Email: admin@example.com
+      Password: password!
+  - Tech
+      Email: tech@example.com
+      Password: password!
+  - Customers
+      Email: customer@example.com
+      Password: password!
+      Email: bobjones@email.com
+      Password: testword!
+6. Or:
+   - Register a customer using the register page
+   - Log in as an existing admin to add another Tech/Admin account
+  
 
 
  Link to Project
